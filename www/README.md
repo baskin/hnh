@@ -1,0 +1,22 @@
+# Welcome to HnH based on OnsenUI 2.
+
+- collections
+- different layout for landscape
+- configure button on welcome page not working
+- hunq: keep ts with each hunt
+   - expire old ones
+- huntq: save image with each hunt for offline mode
+- randomize more
+- iframe issue: allow page to open in new page
+- support filters
+- show tutorial
+- show favs
+- settings
+  - welcome settings (name, email, hunts done)
+  - history size
+  - clear cache
+  - themes
+  - content
+    - sources
+    - topics
+    - horizon

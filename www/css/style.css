@@ -1,0 +1,148 @@
+html{
+    font-size:110%;
+	text-align: center;
+}
+
+@media(min-width:20em) {
+
+	h1 {
+		color: #111; 
+		font-family: 'Helvetica Neue', sans-serif; 
+		font-size: 3em; 
+		font-weight: bold; 
+		margin-bottom: 0;  
+		margin-left: 0.5em;  
+		margin-right: 0.5em; 
+		letter-spacing: -1px; 
+		line-height: 0.75; 
+	}
+
+	h2 { 
+		font-family: 'Open Sans', sans-serif; 
+		font-size: 1em; 
+		font-weight: 200; 
+		margin: 0.5em 1em 1em 1em; 
+		line-height: 0.85;
+	}
+
+	h3 {
+		font-size:60%;
+	}
+
+	sup { 
+		color: #fff; 
+		font-family: 'Open Sans', sans-serif; 
+		font-size: 0.4em; 
+		font-weight: 200;
+	}
+}
+
+section{
+    display: none;
+    padding: 8px
+}
+body {
+	background-color: #373B44
+}
+
+#hunt-summary-text {
+	/*max-width:     15em; */
+	max-height:    10em;
+	position:      relative;
+	padding:       5px;
+	z-index:       10;
+}
+
+#hunt-summary-thumb {
+	max-width:     15em; 
+	max-height:    10em;
+	position:      relative;
+	border:        2px solid #ddd;
+    border-radius: 6px;
+    padding:       5px;
+    z-index:       5;
+}
+#hunt-summary-thumb img {
+	display:       block;
+	height:  100%; 
+	width:   100%; 
+    margin: auto;
+	opacity: 0.5;
+}
+#card-img {
+	display:       block;
+	max-width:     15em; 
+	max-height:    10em;
+    margin: auto;
+}
+#podcast {
+	margin-top: 0.3em; 
+}
+
+.absolute-center {
+  width: 90%;
+  height: 75%;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.absolute-center .small {
+	width: 50%;
+    height: 55%;
+    color: orange;
+}
+
+input[type=text] { 
+	text-align:center; 
+}
+
+#settings {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.history {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.history-li {
+  line-height: 1;
+  padding: 10px;
+}
+
+.history-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+}
+
+.history-date {
+  float: right;
+  font-size: 12px;
+  opacity: 0.35;
+}
+
+.history-from {
+  margin: 10px 0 6px 0;
+}
+
+.history-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.history-id {
+  font-size: 14px;
+  opacity: 0.4;
+}
+
+.history-message {
+  margin-top: 4px;
+  font-size: 14px;
+  opacity: 0.8;
+  line-height: 1.15;
+}
+

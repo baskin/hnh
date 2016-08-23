@@ -1,0 +1,376 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <title>Hackers & Hunters</title>
+
+    <script src="components/loader.js"></script>
+    <script src="lib/angular/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ng-fittext/4.2.1/ng-FitText.min.js"></script>
+    <script src="lib/angular/angular-aria.min.js"></script>
+    <script src="lib/angular/angular-animate.min.js"></script>
+    <script src="lib/angular/angular-messages.min.js"></script>
+    <script src="http://ngmaterial.assets.s3.amazonaws.com/svg-assets-cache.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js"></script>
+    <script src="lib/onsenui/js/onsenui.min.js"></script>
+    <script src="lib/onsenui/js/angular-onsenui.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/appController.js"></script>
+    <script src="js/homeController.js"></script>
+    <script src="js/welcomeController.js"></script>
+
+    <link rel="stylesheet" href="components/loader.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components-sunshine-theme.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+
+</head>
+
+<body ng-controller="appController">
+    <ons-navigator var="nav" animation="fade" page="welcome.html">
+    </ons-navigator>
+</body>
+
+<ons-template id="settings.html">
+    <ons-page>
+    <div  id="settings">
+      <ons-list modifier="inset">
+        <ons-list-item ng-click="nav.pushPage('home.html')" tappable>
+            <ons-icon icon="fa-home"> 
+              Home
+              </ons-icon>
+        </ons-list-item>
+        <ons-list-item ng-click="nav.pushPage('welcome.html', {data: {configure: true}})" tappable>
+            <ons-icon icon="fa-user"> 
+              Profile
+              </ons-icon>
+        </ons-list-item>
+        <ons-list-item ng-click="nav.pushPage('history.html')" tappable>
+            <ons-icon icon="fa-history"> 
+              History
+              </ons-icon>
+        </ons-list-item>
+        <ons-list-item ng-click="nav.pushPage('favs.html')" tappable>
+            <ons-icon icon="fa-heart-o"> 
+              Favourites
+              </ons-icon>
+        </ons-list-item>
+        <ons-list-item ng-click="nav.pushPage('filters.html')" tappable>
+            <ons-icon icon="fa-filter"> 
+              Filters
+              </ons-icon>
+        </ons-list-item>
+        <ons-list-item ng-click="nav.pushPage('about.html')" tappable>
+            <ons-icon icon="fa-info"> 
+              About
+              </ons-icon>
+        </ons-list-item>
+      </ons-list>
+      </div>
+    </ons-page>
+</ons-template>    
+
+<ons-template id="home.html">
+    <ons-page ng-controller="homeController">
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="carousel.prev()">
+                    <ons-icon size="35px" icon="fa-chevron-circle-left"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">
+                <ons-icon size="35px" icon="fa-product-hunt"></ons-icon>
+                    HnH {{$storage.username}}
+                <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+                    <ons-icon size="21px" icon="fa-gear"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="right">
+                <ons-toolbar-button ng-click="carousel.next()">
+                    <ons-icon size="35px" icon="fa-chevron-circle-right"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+        <ons-bottom-toolbar ng-click="go(randomhunt.redirect_url)" ng-show="carousel.getActiveIndex() == 1">
+        <p>
+            Please tap here if the hunt fails to load
+        </p>
+        </ons-bottom-toolbar>
+
+        <ons-pull-hook ng-action="nextHunt($done, 1000)" var="loader">
+            <span ng-switch="loader.state">
+                <span ng-switch-when="initial"><ons-icon size="35px" icon="fa-arrow-circle-down"></ons-icon> Pull down to refresh</span>
+                <span ng-switch-when="preaction"><ons-icon size="35px" icon="fa-arrow-circle-up"></ons-icon> Release to refresh</span>
+                <span ng-switch-when="action"><ons-icon size="35px" spin="true" icon="fa-refresh"></ons-icon> Fetching hunt ...</span>
+            </span>
+        </ons-pull-hook>
+
+        <ons-carousel direction="vertical" var="carousel" fullscreen auto-scroll overscrollable>
+            <ons-carousel-item> <!-- style="background-color: orange;"> -->
+
+                <!-- <div class="center" id="refresh" ng-show="randomhunt == null">
+                    <ons-icon size="35px" icon="fa-refresh" spin="true"></ons-icon>
+                </div> -->
+
+                <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
+                    <section>
+                        <ons-button modifier="light" ng-repeat="topic in randomhunt.topics">
+                            {{topic.name}}
+                        </ons-button>
+                    </section>
+
+                    <div id="hunt-summary-text">
+                        <h1 data-fittext data-fittext-min="inherit">
+                            {{randomhunt.name}}
+                            <sup>{{randomhunt.votes_count}}</sup>
+                        </h1>
+                        <h2 data-fittext data-fittext-min="inherit">{{randomhunt.tagline}}</h2>
+                    </div>
+
+                    <ons-button id="hunt-summary-thumb" ng-click="carousel.setActiveIndex(1)"> 
+                        <img ng-src="{{randomhunt.thumbnail.image_url}}" alt="hunting for image..">
+                    </ons-button>
+                    <div id="podcast" ng-if="randomhunt.hasAudio">
+                        <audio controls>
+                            <source ng-src="{{randomhunt.audioUrl | trustUrl}}" type="audio/ogg">
+                                Your device does not support the audio element.
+                        </audio>
+                    </div>
+
+                </div>
+
+    	<!-- <md-content class="md-padding" layout-xs="column" layout="row">
+		    <div flex-xs flex-gt-xs="50" layout="column">
+		      <md-card>
+		      	<div id="card-img">
+		        <img ng-src="{{randomhunt.thumbnail.image_url}}" class="md-card-image" alt="Washed Out">
+		        </div>
+		        <md-card-title>
+		          <md-card-title-text>
+		            <span class="md-headline">{{randomhunt.name}}</span>
+		          </md-card-title-text>
+		        </md-card-title>
+		        <md-card-content>
+		          <p>
+		            {{randomhunt.tagline}}
+		          </p>
+		        </md-card-content>
+		        <md-card-actions layout="row" layout-align="end center">
+		          <md-button class="md-icon-button" aria-label="Favorite">
+		            <md-icon md-svg-icon="img/icons/favorite.svg"></md-icon>
+		          </md-button>
+		          <md-button class="md-icon-button" aria-label="Settings">
+		            <md-icon md-svg-icon="img/icons/menu.svg"></md-icon>
+		          </md-button>
+		          <md-button class="md-icon-button" aria-label="Share">
+		            <md-icon md-svg-icon="img/icons/share-arrow.svg"></md-icon>
+		          </md-button>
+		        </md-card-actions>
+		      </md-card>
+		    </div>
+  		</md-content> -->
+
+            </ons-carousel-item>
+            
+            <ons-carousel-item style="background-color: black;">
+                <iframe width="100%" height="100%" frameborder="0" ng-src="{{randomhunt.redirect_url | trustUrl}}">
+                </iframe>
+            </ons-carousel-item>
+
+        </ons-carousel>
+
+        <div>
+            <ons-speed-dial position="bottom right" direction="up">
+                <ons-fab>
+                  <ons-icon icon="md-share"></ons-icon>
+                </ons-fab>
+                <ons-speed-dial-item>
+                  <ons-icon icon="md-twitter"></ons-icon>
+                </ons-speed-dial-item>
+                <ons-speed-dial-item>
+                  <ons-icon icon="md-facebook"></ons-icon>
+                </ons-speed-dial-item>
+                <ons-speed-dial-item>
+                  <ons-icon icon="md-google-plus"></ons-icon>
+                </ons-speed-dial-item>
+                <ons-speed-dial-item>
+                  <ons-icon icon="md-whatsapp"></ons-icon>
+                </ons-speed-dial-item>
+          </ons-speed-dial>
+          </div>
+    </ons-page>
+</ons-template>
+
+<ons-template id="welcome.html">
+    <ons-page ng-controller="welcomeController">
+        <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="nav.pushPage('home.html')">
+                <ons-icon size="35px" icon="fa-home"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+                Welcome
+            </div>
+            <div class="right">
+              <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+                <ons-icon size="35px" icon="fa-gear"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+
+          <div id="onboard" class="absolute-center small" ng-if="configure">
+            <ons-input placeholder="What should we call you ? " maxlength="12" float ng-model="username"></ons-input>
+            <!-- <br/>
+            <ons-input placeholder="Email? " type="email" float ng-model="useremail"></ons-input> -->
+            <br/>
+            <ons-button ng-if="username == null || username == ''"  ng-click="nav.pushPage('home.html'); $storage.username='hunter'">
+                Skip
+            </ons-button>
+            <ons-button ng-if="username != null && username != ''" ng-click="nav.pushPage('home.html'); $storage.username=username; $storage.useremail=useremail">
+                Continue
+            </ons-button>
+          </div>
+          <div id="onboard" class="absolute-center small bounceIn" ng-if="!configure">
+              <h1 data-fittext data-fittext-min="inherit">Welcome {{$storage.username}}</h1>
+          </div>
+    </ons-page>
+</ons-template>
+
+<ons-template id="history.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="nav.pushPage('home.html')">
+                <ons-icon size="35px" icon="fa-home"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+                History
+            </div>
+            <div class="right">
+              <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+                <ons-icon size="35px" icon="fa-gear"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+
+        <ons-list class="history" modifier="inset">
+          <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in $storage.history" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
+            <ons-row>
+              <ons-col width="50px">
+                <img ng-src="{{hunt.thumbnail.image_url}}" class="history-image">
+              </ons-col>
+
+              <ons-col>
+                <div class="history-date">{{hunt.votes_count}}</div>
+                <div class="history-from">
+                  <span class="history-name">{{hunt.name}}</span>
+                </div>
+                <div class="history-message">
+                  {{hunt.tagline}}
+                </div>
+              </ons-col>
+            </ons-row>
+          </ons-list-item>
+        </ons-list>
+
+    </ons-page>
+</ons-template>
+
+<ons-template id="favs.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="nav.pushPage('home.html')">
+                <ons-icon size="35px" icon="fa-home"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+                Favourites
+            </div>
+            <div class="right">
+              <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+                <ons-icon size="35px" icon="fa-gear"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+
+        <ons-list class="history" modifier="inset">
+          <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in $storage.favs" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
+            <ons-row>
+              <ons-col width="50px">
+                <img ng-src="{{hunt.thumbnail.image_url}}" class="history-image">
+              </ons-col>
+
+              <ons-col>
+                <div class="history-date">{{hunt.votes_count}}</div>
+                <div class="history-from">
+                  <span class="history-name">{{hunt.name}}</span>
+                </div>
+
+                <div class="history-message">
+                  {{hunt.tagline}}
+                </div>
+              </ons-col>
+            </ons-row>
+          </ons-list-item>
+        </ons-list>
+
+    </ons-page>
+</ons-template>
+
+<ons-template id="filters.html">
+    <ons-page>
+      <ons-toolbar>
+        <div class="left">
+          <ons-toolbar-button ng-click="nav.pushPage('home.html')">
+            <ons-icon size="35px" icon="fa-home"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+        <div class="center">
+            Filters
+        </div>
+        <div class="right">
+          <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+            <ons-icon size="35px" icon="fa-gear"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
+      Chips
+    </ons-page>
+</ons-template>
+
+<ons-template id="about.html">
+    <ons-page>
+      <ons-toolbar>
+        <div class="left">
+          <ons-toolbar-button ng-click="nav.pushPage('home.html')">
+            <ons-icon size="35px" icon="fa-home"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+        <div class="center">
+            About
+        </div>
+        <div class="right">
+          <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+            <ons-icon size="35px" icon="fa-gear"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
+      <div class="center">
+      <h3>
+          Bhupinder Garg © 2016
+      <br/>
+          bhupi.iit@gmail.com
+      </h3>
+      </div>
+    </ons-page>
+</ons-template>
+
+</html>
