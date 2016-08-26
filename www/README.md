@@ -1,22 +1,36 @@
 # Welcome to HnH based on OnsenUI 2.
 
-- collections
-- different layout for landscape
-- configure button on welcome page not working
+- add collections page
+- add filters page
+- add tutorial page
+- add favs page
 - hunq: keep ts with each hunt
    - expire old ones
-- huntq: save image with each hunt for offline mode
-- randomize more
-- iframe issue: allow page to open in new page
-- support filters
-- show tutorial
-- show favs
+   - save image with each hunt for offline mode
+   - randomize more
+- welcome
+  - configure button on welcome page not working
+  - welcome splash: show total hunts, total favs
+  - welcome splash: show did you know
+- home
+  - show image placeholder
+  - reset image, and iframe on pull to refresh
+  - different layout for landscape
+  - save fav
+  - share
+  - see comments
+  - show time created
+  - iframe issue: allow page to open in new page
+- history
+  - remove from history button
+  - configure history size
 - settings
   - welcome settings (name, email, hunts done)
-  - history size
   - clear cache
   - themes
   - content
     - sources
     - topics
     - horizon
+- replace fa icons with md icons
+- js doesn't fire when app comes on foreground again

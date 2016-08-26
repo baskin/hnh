@@ -30,7 +30,7 @@ html{
 	}
 
 	sup { 
-		color: #fff; 
+		color: grey; 
 		font-family: 'Open Sans', sans-serif; 
 		font-size: 0.4em; 
 		font-weight: 200;
@@ -43,6 +43,21 @@ section{
 }
 body {
 	background-color: #373B44
+}
+
+.absolute-center {
+  width: 90%;
+  height: 85%;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.absolute-center .small {
+	width: 50%;
+    height: 55%;
+    color: orange;
 }
 
 #hunt-summary-text {
@@ -62,6 +77,7 @@ body {
     padding:       5px;
     z-index:       5;
 }
+
 #hunt-summary-thumb img {
 	display:       block;
 	height:  100%; 
@@ -69,6 +85,23 @@ body {
     margin: auto;
 	opacity: 0.5;
 }
+
+#hunt-summary-footer {
+	position:      relative;
+    color: grey; 
+	font-family: 'Open Sans', sans-serif; 
+	font-size: 80%; 
+	letter-spacing: -1px; 
+}
+
+#hunt-summary-footer .notification {
+	vertical-align: middle;
+	display: block;
+	height: 10px;
+	max-width: 20em;
+  	margin: auto;
+}
+
 #card-img {
 	display:       block;
 	max-width:     15em; 
@@ -77,21 +110,6 @@ body {
 }
 #podcast {
 	margin-top: 0.3em; 
-}
-
-.absolute-center {
-  width: 90%;
-  height: 75%;
-  overflow: auto;
-  margin: auto;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-}
-
-.absolute-center .small {
-	width: 50%;
-    height: 55%;
-    color: orange;
 }
 
 input[type=text] { 
@@ -145,4 +163,3 @@ input[type=text] {
   opacity: 0.8;
   line-height: 1.15;
 }
-

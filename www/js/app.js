@@ -6,9 +6,16 @@ module.filter('unescape', function() {
 });
 
 module.filter('trustUrl', function ($sce) {
-      return function(url) {
-          return $sce.trustAsResourceUrl(url);
-      };
+    return function(url) {
+        return $sce.trustAsResourceUrl(url);
+    };
+});
+
+module.filter('hashValues', function() {
+    return function($hash) {
+        var keys = Object.keys($hash);
+        return keys.map(function(v) { return $hash[v]; });
+    }
 });
 
 // directives
@@ -25,5 +32,30 @@ module.directive('hideOnError', function($timeout) {
            })
        }
 }});
+
+module.service('bookmarksService', function($localStorage) {
+
+    $localStorage.$default({
+        bookmarks: {}
+    });
+    this.add = function(hunt) {
+        console.log("Adding to bookmarks");
+        $localStorage.bookmarks[hunt.id] = hunt;
+    }
+
+    this.remove = function(hunt) {
+        delete $localStorage.bookmarks[hunt.id];
+    }
+
+    this.has = function(hunt) {
+      return hunt.id in $localStorage.bookmarks;
+    }
+
+    this.getAll = function() {
+        var keys = Object.keys($localStorage.bookmarks);
+        return keys.map(function(v) { return $localStorage.bookmarks[v]; });
+    }
+
+});
 
 console.log("App module created");

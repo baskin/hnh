@@ -21,6 +21,8 @@
     <script src="js/appController.js"></script>
     <script src="js/homeController.js"></script>
     <script src="js/welcomeController.js"></script>
+    <script src="js/bookmarksController.js"></script>
+    <script src="js/filtersController.js"></script>
 
     <link rel="stylesheet" href="components/loader.css">
     <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
@@ -55,9 +57,9 @@
               History
               </ons-icon>
         </ons-list-item>
-        <ons-list-item ng-click="nav.pushPage('favs.html')" tappable>
-            <ons-icon icon="fa-heart-o"> 
-              Favourites
+        <ons-list-item ng-click="nav.pushPage('bookmarks.html')" tappable>
+            <ons-icon icon="fa-bookmark-o"> 
+              Bookmarks
               </ons-icon>
         </ons-list-item>
         <ons-list-item ng-click="nav.pushPage('filters.html')" tappable>
@@ -111,11 +113,7 @@
         </ons-pull-hook>
 
         <ons-carousel direction="vertical" var="carousel" fullscreen auto-scroll overscrollable>
-            <ons-carousel-item> <!-- style="background-color: orange;"> -->
-
-                <!-- <div class="center" id="refresh" ng-show="randomhunt == null">
-                    <ons-icon size="35px" icon="fa-refresh" spin="true"></ons-icon>
-                </div> -->
+            <ons-carousel-item>
 
                 <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
                     <section>
@@ -127,7 +125,6 @@
                     <div id="hunt-summary-text">
                         <h1 data-fittext data-fittext-min="inherit">
                             {{randomhunt.name}}
-                            <sup>{{randomhunt.votes_count}}</sup>
                         </h1>
                         <h2 data-fittext data-fittext-min="inherit">{{randomhunt.tagline}}</h2>
                     </div>
@@ -140,6 +137,30 @@
                             <source ng-src="{{randomhunt.audioUrl | trustUrl}}" type="audio/ogg">
                                 Your device does not support the audio element.
                         </audio>
+                    </div>
+
+                    <div id="hunt-summary-footer">
+                        <span class="notification">&nbsp;</span>
+                        <span><ons-icon icon="fa-caret-up">{{randomhunt.votes_count}}</ons-icon></span>
+                        <span>&nbsp;&nbsp;{{randomhunt.created_at | date:'mediumDate'}}&nbsp;&nbsp;</span>
+                        <span ng-switch="isBookmarked(randomhunt)">
+                          <ons-button modifier="quiet" ng-switch-when="false" ripple ng-click="addBookmark(randomhunt)">
+                              <ons-icon icon="fa-bookmark-o"></ons-icon>
+                          </ons-button>
+                          <ons-button modifier="quiet" ng-switch-when="true" ripple ng-click="removeBookmark(randomhunt)">
+                              <ons-icon icon="fa-bookmark"></ons-icon>
+                          </ons-button>
+                        </span>
+                        <span>
+                          <ons-button modifier="quiet" ripple ng-click="console.log('share clicked')">
+                              <ons-icon icon="fa-share-alt"></ons-icon>
+                          </ons-button>
+                        </span>
+                        <span>
+                          <ons-button modifier="quiet" ripple ng-click="console.log('show comments')">
+                              <ons-icon icon="fa-comments-o">{{randomhunt.comments_count}}</ons-icon>
+                          </ons-button>
+                        </span>
                     </div>
 
                 </div>
@@ -243,7 +264,7 @@
 </ons-template>
 
 <ons-template id="history.html">
-    <ons-page>
+    <ons-page ng-controller="bookmarksController">
         <ons-toolbar>
             <div class="left">
               <ons-toolbar-button ng-click="nav.pushPage('home.html')">
@@ -268,7 +289,15 @@
               </ons-col>
 
               <ons-col>
-                <div class="history-date">{{hunt.votes_count}}</div>
+                <div class="history-date">
+                    <span>
+                        {{hunt.votes_count}}
+                    </span>
+                    <span ng-switch="isBookmarked(hunt)">
+                        <ons-icon icon="fa-bookmark-o" ng-switch-when="false"></ons-icon>
+                        <ons-icon icon="fa-bookmark" ng-switch-when="true"></ons-icon>
+                    </span>
+                </div>
                 <div class="history-from">
                   <span class="history-name">{{hunt.name}}</span>
                 </div>
@@ -283,8 +312,8 @@
     </ons-page>
 </ons-template>
 
-<ons-template id="favs.html">
-    <ons-page>
+<ons-template id="bookmarks.html">
+    <ons-page ng-controller="bookmarksController">
         <ons-toolbar>
             <div class="left">
               <ons-toolbar-button ng-click="nav.pushPage('home.html')">
@@ -292,7 +321,7 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-                Favourites
+                Bookmarks
             </div>
             <div class="right">
               <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
@@ -302,14 +331,22 @@
         </ons-toolbar>
 
         <ons-list class="history" modifier="inset">
-          <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in $storage.favs" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
+          <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in allBookmarks" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
             <ons-row>
               <ons-col width="50px">
                 <img ng-src="{{hunt.thumbnail.image_url}}" class="history-image">
               </ons-col>
 
               <ons-col>
-                <div class="history-date">{{hunt.votes_count}}</div>
+                <div class="history-date">
+                    <span>
+                        {{hunt.votes_count}}
+                    </span>
+                    <span ng-switch="isBookmarked(hunt)">
+                        <ons-icon icon="fa-bookmark-o" ng-switch-when="false"></ons-icon>
+                        <ons-icon icon="fa-bookmark" ng-switch-when="true"></ons-icon>
+                    </span>
+                </div>
                 <div class="history-from">
                   <span class="history-name">{{hunt.name}}</span>
                 </div>
@@ -326,7 +363,7 @@
 </ons-template>
 
 <ons-template id="filters.html">
-    <ons-page>
+    <ons-page ng-controller="filtersController">
       <ons-toolbar>
         <div class="left">
           <ons-toolbar-button ng-click="nav.pushPage('home.html')">

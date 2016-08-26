@@ -1,5 +1,5 @@
 
-module.controller('homeController', function($scope, $http, $location) {
+module.controller('homeController', function($scope, $http, $location, bookmarksService) {
 
   $scope.useHunt = function(hunt) {
       $scope.randomhunt = hunt;
@@ -34,6 +34,9 @@ module.controller('homeController', function($scope, $http, $location) {
           var hunts = q.splice(randomIndex, 1);
           console.log("HuntQ size after popping random hunt is " + $scope.$storage.huntq.length);
           var hunt = hunts[0];
+          if (hunt.isFav == null) {
+              hunt.isFav = false;
+          }
           $scope.$storage.history.unshift(hunt);
           if ($scope.$storage.history.length > 25) {
               // history size full, pop
@@ -89,6 +92,18 @@ module.controller('homeController', function($scope, $http, $location) {
       );
   }
 
+  $scope.addBookmark = function($hunt) {
+      bookmarksService.add($hunt);
+  }
+
+  $scope.removeBookmark = function($hunt) {
+      bookmarksService.remove($hunt);
+  }
+
+  $scope.isBookmarked = function($hunt) {
+      return bookmarksService.has($hunt);
+  }
+
   $scope.gotoHunt = function($hunt) {
       console.log("Navigating to hunt " + $hunt.redirect_url);
       $scope.randomhunt = $hunt;
@@ -101,7 +116,7 @@ module.controller('homeController', function($scope, $http, $location) {
   };
 
   ons.ready(function() {
-      console.log("HomeController ready");
+      console.log("HomeController loaded");
       console.log("Loaded HuntQ with size " + $scope.$storage.huntq.length);
       console.log("Custom data passed: " + $scope.nav.topPage.data);
       
@@ -110,7 +125,7 @@ module.controller('homeController', function($scope, $http, $location) {
       }
       else {
         if ($scope.$storage.huntq.length < 100) {
-            $scope.updateHuntQ($scope.nextHunt());
+            $scope.updateHuntQ($scope.nextHunt);
         }
         else {
           $scope.nextHunt();
