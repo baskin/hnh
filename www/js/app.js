@@ -83,10 +83,74 @@ module.service('bookmarksService', function($localStorage) {
 
 module.service('randomHuntService', function($http, $localStorage) {
 
-    var HUNTQ_IDLE_SIZE = 100;
+    var HUNTQ_IDLE_SIZE = 25;
     $localStorage.$default({
-        huntq: []
+        huntq: [],
+        filter: {
+            topics : [],
+            createdAfter : new Date(2014, 01, 01).toISOString()
+        }
     });
+
+    var topicFilterOk = function(hunt, topics) {
+        // topic filter
+        // "topics":[{"id":68,"name":"Video Streaming","slug":"video-streaming"},{"id":2,"name":"Android","slug":"android"}]
+        if (topics.length == 0) {
+            return true; // nothing to filter
+        }
+        for (var i in hunt.topics) {
+            for (var j in topics) {
+                if (hunt.topics[i].id == topics[j].id) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    var dateFilterOk = function(hunt, createdAfter) {
+        return (new Date(hunt.created_at).getTime() >= new Date(createdAfter).getTime());
+    }
+
+     // private
+    this.include = function(hunt, filter) {
+      if (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics)) {
+          return true;
+      }
+      return false;
+    }
+
+    // private
+    this.applyFilter = function(filter) {
+        console.log("Applying filter " + filter + " on huntq");
+        var huntQ = $localStorage.huntq;
+        var updatedHuntQ = []
+        for(var i in huntQ) {
+            if (this.include(huntQ[i], filter)) {
+                updatedHuntQ.push(huntQ[i]);
+            }
+        }
+        console.log("Reduced HuntQ size from " + $localStorage.huntq.length + " to " + updatedHuntQ.length);
+        $localStorage.huntq = updatedHuntQ;
+        this.sync();
+    }
+
+    this.setFilter = function(type, filter) {
+        console.log("Setting filter of type " + type);
+        $localStorage.filter[type] = filter;
+        this.applyFilter($localStorage.filter)
+    }
+
+    var shufffle = function(a) {
+      var j, x, i;
+      for (i = a.length; i; i--) {
+          j = Math.floor(Math.random() * i);
+          x = a[i - 1];
+          a[i - 1] = a[j];
+          a[j] = x;
+      }
+    }
+
 
     this.sync = function($done) {
 
@@ -99,12 +163,13 @@ module.service('randomHuntService', function($http, $localStorage) {
       console.log("Updating HuntQ...")
       var url = "https://api.producthunt.com/v1/posts";
       topicFilter = false;
-      // 208 angel investing
-      if (topicFilter) {
-          url = url + "/all?search[topic]=" + 208; // TODO paging.
+      if ($localStorage.filter.topics.length > 0) {
+          url = url + "/all?search[topic]=" + $localStorage.filter.topics[0].id; // 208;
       }
       else {
-          var daysAgo = Math.floor(Math.random() * 251);
+          // daysBetween = 365
+          var daysBetween = Math.round((Date.now() - new Date($localStorage.filter.createdAfter))/(1000*60*60*24));
+          var daysAgo = Math.floor(Math.random() * daysBetween);
           url = url + "?days_ago=" + daysAgo;
       }
       var headerOptions = {
@@ -119,6 +184,9 @@ module.service('randomHuntService', function($http, $localStorage) {
             // First function handles success
             body = response.data['posts'];
             console.log("Fetched " + body.length + " hunts");
+            shufffle(body);
+            body = body.slice(0, 10); // reduce size from single response
+            console.log("Retained " + body.length + " random hunts");
             $localStorage.huntq = $localStorage.huntq.concat(body);
             console.log("New HuntQ size " + $localStorage.huntq.length);
             if ($done != null) {
@@ -139,6 +207,7 @@ module.service('randomHuntService', function($http, $localStorage) {
       console.log("HuntQ size " + $localStorage.huntq.length);
       var q = $localStorage.huntq;
 
+      var hunt = null;
       if (q.length > 0) {
           var randomIndex = Math.floor(Math.random() * q.length);
           var hunts = q.splice(randomIndex, 1);
@@ -147,15 +216,14 @@ module.service('randomHuntService', function($http, $localStorage) {
           if (hunt.isFav == null) {
               hunt.isFav = false;
           }
-          return hunt;
       }
       else {
           console.error("No hunts to show");
       }
       // build a healthy set of buffered hunts
-      sync();
+      this.sync();
+      return hunt;
   }
-
 });
 
 console.log("App module created");

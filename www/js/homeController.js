@@ -15,7 +15,6 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       $scope.randomhunt.hasAudio = hasAudio;
       $scope.randomhunt.audioUrl = audioUrl;
       if (null != $done) {
-          console.log("Calling callback done()")
           $done();
       }
   }
@@ -30,9 +29,11 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       $delay = $delay || 0;
       setTimeout(function() { 
           var hunt = randomHuntService.next();
-          historyService.add(hunt);
-          $scope.updateModel(hunt, $done);
-          $scope.showFab = true;
+          if (hunt != null) {
+              historyService.add(hunt);
+              $scope.updateModel(hunt, $done);
+              $scope.showFab = true;
+          }
       }, $delay);
   }
 
@@ -56,12 +57,11 @@ module.controller('homeController', function($scope, $http, $location, randomHun
 
   $scope.pullHookStateChanged = function($event) {
       $scope.showFab = false; 
-      console.log("pull hook state changed:" + $event.state);
+      // console.log("pull hook state changed:" + $event.state);
   }
 
   ons.ready(function() {
       console.log("HomeController loaded");
-      console.log("Custom data passed: " + $scope.nav.topPage.data);
       
       if ($scope.nav.topPage.data != null && $scope.nav.topPage.data.randomhunt != null) {
           $scope.updateModel($scope.nav.topPage.data.randomhunt);
