@@ -114,21 +114,29 @@
 
         <ons-carousel direction="vertical" var="carousel" fullscreen auto-scroll overscrollable>
             <ons-carousel-item>
-
                 <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
-                    <section>
-                        <ons-button modifier="light" ng-repeat="topic in randomhunt.topics">
-                            {{topic.name}}
-                        </ons-button>
+                    <section id="hunt-topics">
+                        <span ng-repeat="topic in randomhunt.topics">
+                            <span class="notification">{{topic.name}}</span>
+                            <span>&nbsp;</span>
+                        </span>
                     </section>
-
                     <div id="hunt-summary-text">
-                        <h1 data-fittext data-fittext-min="inherit">
+                        <h1 data-fittext data-fittext-min="inherit" data-fittext-load-delay="500">
                             {{randomhunt.name}}
                         </h1>
-                        <h2 data-fittext data-fittext-min="inherit">{{randomhunt.tagline}}</h2>
+                        <h2 data-fittext data-fittext-min="inherit">
+                            {{randomhunt.tagline}}
+                            <sup>{{randomhunt.votes_count}}</sup>
+                        </h2>
                     </div>
 
+                    <div id="hunt-summary-date" class="box">
+                        <div class="date">
+                            <div id="daymonth">{{randomhunt.created_at | date:'MMM dd'}}</div>
+                            <div id="year">{{randomhunt.created_at | date:'yyyy'}}</div>
+                        </div>
+                    </div>
                     <ons-button id="hunt-summary-thumb" ng-click="carousel.setActiveIndex(1)"> 
                         <img ng-src="{{randomhunt.thumbnail.image_url}}" alt="hunting for image..">
                     </ons-button>
@@ -140,9 +148,7 @@
                     </div>
 
                     <div id="hunt-summary-footer">
-                        <span class="notification">&nbsp;</span>
-                        <span><ons-icon icon="fa-caret-up">{{randomhunt.votes_count}}</ons-icon></span>
-                        <span>&nbsp;&nbsp;{{randomhunt.created_at | date:'mediumDate'}}&nbsp;&nbsp;</span>
+                        <span id="laptop" class="notification">&nbsp;</span>
                         <span ng-switch="isBookmarked(randomhunt)">
                           <ons-button modifier="quiet" ng-switch-when="false" ripple ng-click="addBookmark(randomhunt)">
                               <ons-icon icon="fa-bookmark-o"></ons-icon>
@@ -164,41 +170,10 @@
                     </div>
 
                 </div>
-
-    	<!-- <md-content class="md-padding" layout-xs="column" layout="row">
-		    <div flex-xs flex-gt-xs="50" layout="column">
-		      <md-card>
-		      	<div id="card-img">
-		        <img ng-src="{{randomhunt.thumbnail.image_url}}" class="md-card-image" alt="Washed Out">
-		        </div>
-		        <md-card-title>
-		          <md-card-title-text>
-		            <span class="md-headline">{{randomhunt.name}}</span>
-		          </md-card-title-text>
-		        </md-card-title>
-		        <md-card-content>
-		          <p>
-		            {{randomhunt.tagline}}
-		          </p>
-		        </md-card-content>
-		        <md-card-actions layout="row" layout-align="end center">
-		          <md-button class="md-icon-button" aria-label="Favorite">
-		            <md-icon md-svg-icon="img/icons/favorite.svg"></md-icon>
-		          </md-button>
-		          <md-button class="md-icon-button" aria-label="Settings">
-		            <md-icon md-svg-icon="img/icons/menu.svg"></md-icon>
-		          </md-button>
-		          <md-button class="md-icon-button" aria-label="Share">
-		            <md-icon md-svg-icon="img/icons/share-arrow.svg"></md-icon>
-		          </md-button>
-		        </md-card-actions>
-		      </md-card>
-		    </div>
-  		</md-content> -->
-
+                
             </ons-carousel-item>
             
-            <ons-carousel-item style="background-color: black;">
+            <ons-carousel-item>
                 <iframe width="100%" height="100%" frameborder="0" ng-src="{{randomhunt.redirect_url | trustUrl}}">
                 </iframe>
             </ons-carousel-item>

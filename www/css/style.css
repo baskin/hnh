@@ -32,15 +32,11 @@ html{
 	sup { 
 		color: grey; 
 		font-family: 'Open Sans', sans-serif; 
-		font-size: 0.4em; 
+		font-size: 0.6em; 
 		font-weight: 200;
 	}
 }
 
-section{
-    display: none;
-    padding: 8px
-}
 body {
 	background-color: #373B44
 }
@@ -60,12 +56,34 @@ body {
     color: orange;
 }
 
+#hunt-topics {
+	display: none;
+	position:      relative;
+    color: grey; 
+	font-family: 'Open Sans', sans-serif; 
+	letter-spacing: -1px; 
+	opacity: 0.5;
+}
+
 #hunt-summary-text {
 	/*max-width:     15em; */
 	max-height:    10em;
 	position:      relative;
 	padding:       5px;
 	z-index:       10;
+}
+
+#hunt-summary-media {
+	max-width:     20em; 
+	max-height:    10em;
+	position:      relative;
+}
+
+#hunt-summary-date {
+	position:      relative;
+	z-index:       11;
+	opacity: 0.75;
+	top: 1em; left: -7em; 
 }
 
 #hunt-summary-thumb {
@@ -90,8 +108,7 @@ body {
 	position:      relative;
     color: grey; 
 	font-family: 'Open Sans', sans-serif; 
-	font-size: 80%; 
-	letter-spacing: -1px; 
+	font-size: 80%;
 }
 
 #hunt-summary-footer .notification {
@@ -110,6 +127,10 @@ body {
 }
 #podcast {
 	margin-top: 0.3em; 
+}
+
+#onboard .text-input {
+	text-align: center;
 }
 
 input[type=text] { 
@@ -163,3 +184,23 @@ input[type=text] {
   opacity: 0.8;
   line-height: 1.15;
 }
+
+.box {
+  background: #eb482f;
+  /*border-radius:6px;*/
+  display:inline-block;
+  padding:0 1px 1px;
+  box-shadow: 2px 2px 1px #888888
+}
+
+.date #daymonth {
+  color: white;
+  font-size:0.5em;
+}
+.date #year {
+  background: white;
+  color: #eb482f;
+  font-size:0.7em;
+}
+
+

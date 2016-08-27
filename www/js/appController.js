@@ -1,14 +1,8 @@
-module.controller('appController', function($scope, $localStorage, $sessionStorage) {
-
-  $scope.$storage = $localStorage;
-  $scope.$storage = $localStorage.$default({
-      huntq: [],
-      history: [],
-      // bookmarks: {}
-  });
+module.controller('appController', function($scope, $localStorage, $sessionStorage, randomHuntService) {
+    $scope.$storage = $localStorage;
+    randomHuntService.sync();
 });
 
 ons.ready(function() {
     console.log("AppController loaded");
-  }
-);
+});

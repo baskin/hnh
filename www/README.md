@@ -34,3 +34,4 @@
     - horizon
 - replace fa icons with md icons
 - js doesn't fire when app comes on foreground again
+- save prefs, history, bookmarks to drive
