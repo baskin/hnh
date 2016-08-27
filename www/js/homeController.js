@@ -20,6 +20,10 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       }
   }
 
+  $scope.resetModel = function() {
+      $scope.randomhunt = null;
+  }
+
   $scope.nextHunt = function($done, $delay) {
       // Introduce optional artifical delay to 'look' like 
       // hunt is being fetched online.
@@ -28,6 +32,7 @@ module.controller('homeController', function($scope, $http, $location, randomHun
           var hunt = randomHuntService.next();
           historyService.add(hunt);
           $scope.updateModel(hunt, $done);
+          $scope.showFab = true;
       }, $delay);
   }
 
@@ -49,10 +54,10 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       $scope.nav.pushPage('hunt.html');
   }
 
-  $scope.go = function(path) {
-      console.log("going to path " + path);
-      $location.path( path );
-  };
+  $scope.pullHookStateChanged = function($event) {
+      $scope.showFab = false; 
+      console.log("pull hook state changed:" + $event.state);
+  }
 
   ons.ready(function() {
       console.log("HomeController loaded");

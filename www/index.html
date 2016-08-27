@@ -22,6 +22,7 @@
     <script src="js/homeController.js"></script>
     <script src="js/welcomeController.js"></script>
     <script src="js/bookmarksController.js"></script>
+    <script src="js/huntController.js"></script>
     <script src="js/filtersController.js"></script>
 
     <link rel="stylesheet" href="components/loader.css">
@@ -80,108 +81,82 @@
 <ons-template id="home.html">
     <ons-page ng-controller="homeController">
         <ons-toolbar>
-            <div class="left">
-                <ons-toolbar-button ng-click="carousel.prev()">
-                    <ons-icon size="35px" icon="fa-chevron-circle-left"></ons-icon>
-                </ons-toolbar-button>
-            </div>
             <div class="center">
                 <ons-icon size="35px" icon="fa-product-hunt"></ons-icon>
-                    HnH {{$storage.username}}
-                <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
-                    <ons-icon size="21px" icon="fa-gear"></ons-icon>
-                </ons-toolbar-button>
+                HnH {{$storage.username}}
             </div>
             <div class="right">
-                <ons-toolbar-button ng-click="carousel.next()">
-                    <ons-icon size="35px" icon="fa-chevron-circle-right"></ons-icon>
+                <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+                    <ons-icon size="35px" icon="fa-gear"></ons-icon>
                 </ons-toolbar-button>
             </div>
         </ons-toolbar>
-        <ons-bottom-toolbar ng-click="go(randomhunt.redirect_url)" ng-show="carousel.getActiveIndex() == 1">
-        <p>
-            Please tap here if the hunt fails to load
-        </p>
         </ons-bottom-toolbar>
 
-        <ons-pull-hook ng-action="nextHunt($done, 1000)" var="loader">
-            <span ng-switch="loader.state">
+        <ons-pull-hook ng-action="nextHunt($done, 1000)" var="pullHook" ons-changestate="pullHookStateChanged($event)">
+            <span ng-switch="pullHook.state">
                 <span ng-switch-when="initial"><ons-icon size="35px" icon="fa-arrow-circle-down"></ons-icon> Pull down to refresh</span>
                 <span ng-switch-when="preaction"><ons-icon size="35px" icon="fa-arrow-circle-up"></ons-icon> Release to refresh</span>
                 <span ng-switch-when="action"><ons-icon size="35px" spin="true" icon="fa-refresh"></ons-icon> Fetching hunt ...</span>
             </span>
         </ons-pull-hook>
 
-        <ons-carousel direction="vertical" var="carousel" fullscreen auto-scroll overscrollable>
-            <ons-carousel-item>
-                <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
-                    <section id="hunt-topics">
-                        <span ng-repeat="topic in randomhunt.topics">
-                            <span class="notification">{{topic.name}}</span>
-                            <span>&nbsp;</span>
-                        </span>
-                    </section>
-                    <div id="hunt-summary-text">
-                        <h1 data-fittext data-fittext-min="inherit" data-fittext-load-delay="500">
-                            {{randomhunt.name}}
-                        </h1>
-                        <h2 data-fittext data-fittext-min="inherit">
-                            {{randomhunt.tagline}}
-                            <sup>{{randomhunt.votes_count}}</sup>
-                        </h2>
-                    </div>
+        <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
+            <section id="hunt-topics">
+                <span ng-repeat="topic in randomhunt.topics">
+                    <span class="notification">{{topic.name}}</span>
+                    <span>&nbsp;</span>
+                </span>
+            </section>
+            <div id="hunt-summary-text">
+                <h1 data-fittext data-fittext-min="inherit" data-fittext-load-delay="500">
+                    {{randomhunt.name}}
+                </h1>
+                <h2 data-fittext data-fittext-min="inherit">
+                    {{randomhunt.tagline}}
+                    <sup>{{randomhunt.votes_count}}</sup>
+                </h2>
+            </div>
 
-                    <div id="hunt-summary-date" class="box">
-                        <div class="date">
-                            <div id="daymonth">{{randomhunt.created_at | date:'MMM dd'}}</div>
-                            <div id="year">{{randomhunt.created_at | date:'yyyy'}}</div>
-                        </div>
-                    </div>
-                    <ons-button id="hunt-summary-thumb" ng-click="carousel.setActiveIndex(1)"> 
-                        <img ng-src="{{randomhunt.thumbnail.image_url}}" alt="hunting for image..">
-                    </ons-button>
-                    <div id="podcast" ng-if="randomhunt.hasAudio">
-                        <audio controls>
-                            <source ng-src="{{randomhunt.audioUrl | trustUrl}}" type="audio/ogg">
-                                Your device does not support the audio element.
-                        </audio>
-                    </div>
-
-                    <div id="hunt-summary-footer">
-                        <span id="laptop" class="notification">&nbsp;</span>
-                        <span ng-switch="isBookmarked(randomhunt)">
-                          <ons-button modifier="quiet" ng-switch-when="false" ripple ng-click="addBookmark(randomhunt)">
-                              <ons-icon icon="fa-bookmark-o"></ons-icon>
-                          </ons-button>
-                          <ons-button modifier="quiet" ng-switch-when="true" ripple ng-click="removeBookmark(randomhunt)">
-                              <ons-icon icon="fa-bookmark"></ons-icon>
-                          </ons-button>
-                        </span>
-                        <span>
-                          <ons-button modifier="quiet" ripple ng-click="console.log('share clicked')">
-                              <ons-icon icon="fa-share-alt"></ons-icon>
-                          </ons-button>
-                        </span>
-                        <span>
-                          <ons-button modifier="quiet" ripple ng-click="console.log('show comments')">
-                              <ons-icon icon="fa-comments-o">{{randomhunt.comments_count}}</ons-icon>
-                          </ons-button>
-                        </span>
-                    </div>
-
+            <div id="hunt-summary-date" class="box">
+                <div class="date">
+                    <div id="daymonth">{{randomhunt.created_at | date:'MMM dd'}}</div>
+                    <div id="year">{{randomhunt.created_at | date:'yyyy'}}</div>
                 </div>
-                
-            </ons-carousel-item>
-            
-            <ons-carousel-item>
-                <iframe width="100%" height="100%" frameborder="0" ng-src="{{randomhunt.redirect_url | trustUrl}}">
-                </iframe>
-            </ons-carousel-item>
+            </div>
+            <ons-button id="hunt-summary-thumb" ng-click="nav.pushPage('hunt.html', {data: {randomhunt: randomhunt}})"> 
+                <img ng-src="{{randomhunt.thumbnail.image_url}}" alt="hunting for image..">
+            </ons-button>
+            <div id="podcast" ng-if="randomhunt.hasAudio">
+                <audio controls>
+                    <source ng-src="{{randomhunt.audioUrl | trustUrl}}" type="audio/ogg">
+                        Your device does not support the audio element.
+                </audio>
+            </div>
 
-        </ons-carousel>
+            <div id="hunt-summary-footer">
+                <span id="laptop" class="notification">&nbsp;</span>
+                <span ng-switch="isBookmarked(randomhunt)">
+                  <ons-button modifier="quiet" ng-switch-when="false" ripple ng-click="addBookmark(randomhunt)">
+                      <ons-icon icon="fa-bookmark-o"></ons-icon>
+                  </ons-button>
+                  <ons-button modifier="quiet" ng-switch-when="true" ripple ng-click="removeBookmark(randomhunt)">
+                      <ons-icon icon="fa-bookmark"></ons-icon>
+                  </ons-button>
+                </span>
+                <span>
+                  <ons-button modifier="quiet" ripple ng-click="console.log('share clicked')">
+                      <ons-icon icon="fa-share-alt"></ons-icon>
+                  </ons-button>
+                </span>
+                <span>
+                  <ons-button modifier="quiet" ripple ng-click="console.log('show comments')">
+                      <ons-icon icon="fa-comments-o">{{randomhunt.comments_count}}</ons-icon>
+                  </ons-button>
+                </span>
+            </div>
 
-        <div>
-            <ons-speed-dial position="bottom right" direction="up">
+            <ons-speed-dial id="hunt-summary-share" position="bottom right" direction="left" ng-show="showFab">
                 <ons-fab>
                   <ons-icon icon="md-share"></ons-icon>
                 </ons-fab>
@@ -192,13 +167,38 @@
                   <ons-icon icon="md-facebook"></ons-icon>
                 </ons-speed-dial-item>
                 <ons-speed-dial-item>
-                  <ons-icon icon="md-google-plus"></ons-icon>
-                </ons-speed-dial-item>
-                <ons-speed-dial-item>
                   <ons-icon icon="md-whatsapp"></ons-icon>
                 </ons-speed-dial-item>
-          </ons-speed-dial>
-          </div>
+            </ons-speed-dial>
+
+        </div>
+    </ons-page>
+</ons-template>
+
+<ons-template id="hunt.html">
+    <ons-page ng-controller="huntController">
+        <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="nav.popPage()">
+                <ons-icon size="35px" icon="fa-step-backward"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+                {{randomhunt.name}}
+            </div>
+            <div class="right">
+              <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
+                <ons-icon size="35px" icon="fa-gear"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+        <ons-bottom-toolbar ng-click="go(randomhunt.redirect_url)">
+            Please tap here if the hunt fails to load
+        </ons-bottom-toolbar>
+        <div id="hunt-iframe-holder">
+            <iframe width="100%" height="100%" frameborder="0" ng-src="{{randomhunt.redirect_url | trustUrl}}">
+            </iframe>
+        </div>
     </ons-page>
 </ons-template>
 

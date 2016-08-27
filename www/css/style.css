@@ -70,7 +70,7 @@ body {
 	max-height:    10em;
 	position:      relative;
 	padding:       5px;
-	z-index:       10;
+    z-index:       10;
 }
 
 #hunt-summary-media {
@@ -80,10 +80,9 @@ body {
 }
 
 #hunt-summary-date {
-	position:      relative;
+	position:     absolute;
 	z-index:       11;
 	opacity: 0.75;
-	top: 1em; left: -7em; 
 }
 
 #hunt-summary-thumb {
@@ -109,6 +108,10 @@ body {
     color: grey; 
 	font-family: 'Open Sans', sans-serif; 
 	font-size: 80%;
+}
+
+#hunt-summary-share {
+	z-index: 15;
 }
 
 #hunt-summary-footer .notification {
@@ -201,6 +204,19 @@ input[type=text] {
   background: white;
   color: #eb482f;
   font-size:0.7em;
+}
+
+#hunt-iframe-holder {
+    background-color: #ede9df;
+    background-image: url(../images/07-progress.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100%;
+    width: 100%;
+}
+
+#hunt-summary-share .fab {
+	background-color: #eb482f;
 }
 
 
