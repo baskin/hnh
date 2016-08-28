@@ -33,6 +33,31 @@ module.directive('hideOnError', function($timeout) {
        }
 }});
 
+module.directive('imageonload', function() {
+    return {
+        restrict: 'A',
+        scope: {
+            ngSrc: '@'
+        },
+        link: function(scope, element) {
+          element.on('load', function() {
+              // Set visibility: true + remove spinner overlay
+              element.removeClass('summary-image-hide');
+              element.removeClass('loading');
+              element.addClass('summary-image-show');
+              console.log("Summary image loaded");
+          });
+          scope.$watch('ngSrc', function() {
+              // Set visibility: false + inject temporary spinner overlay
+              element.addClass('loading');
+              element.addClass('summary-image-hide');
+              element.removeClass('summary-image-show');
+              console.log("Summary image src changed");
+          });
+        }
+    };
+});
+
 module.service('historyService', function($localStorage) {
 
     var HISTORY_SIZE = 25;
@@ -42,11 +67,25 @@ module.service('historyService', function($localStorage) {
     });
 
     this.add = function(hunt) {
-        $localStorage.history.unshift(hunt);
-        if ($localStorage.history.length > HISTORY_SIZE) {
-            // history size full, pop
-            $localStorage.history.pop();
+        var h = $localStorage.history;
+        // Remove the older occurance of hunt
+        var removeIndex = -1;
+        for (var i = 0; i < h.length; i++) {
+            if (h[i].id == hunt.id) {
+                removeIndex = i;
+                break;
+            }
         }
+        if (removeIndex != -1) {
+            h.splice(removeIndex, 1);
+        }
+        // push to front
+        h.unshift(hunt);
+        if (h.length > HISTORY_SIZE) {
+            // history size full, pop
+            h.pop();
+        }
+        $localStorage.history = h;
     }
 
     this.getAll = function() {

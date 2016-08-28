@@ -2,6 +2,7 @@
 module.controller('homeController', function($scope, $http, $location, randomHuntService, historyService, bookmarksService) {
 
   $scope.updateModel = function(hunt, $done) {
+      historyService.add(hunt);
       $scope.randomhunt = hunt;
       var hasAudio = hunt.thumbnail.media_type == 'audio';
       if (hasAudio) {
@@ -26,15 +27,20 @@ module.controller('homeController', function($scope, $http, $location, randomHun
   $scope.nextHunt = function($done, $delay) {
       // Introduce optional artifical delay to 'look' like 
       // hunt is being fetched online.
+      $scope.summaryImageClass = "loading";
       $delay = $delay || 0;
       setTimeout(function() { 
           var hunt = randomHuntService.next();
           if (hunt != null) {
-              historyService.add(hunt);
               $scope.updateModel(hunt, $done);
               $scope.showFab = true;
           }
       }, $delay);
+  }
+
+  $scope.huntImageLoaded = function() {
+      console.log("Hunt image loaded. Removing loading animation");
+      $scope.summaryImageClass = "";
   }
 
   $scope.addBookmark = function($hunt) {
@@ -64,7 +70,8 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       console.log("HomeController loaded");
       
       if ($scope.nav.topPage.data != null && $scope.nav.topPage.data.randomhunt != null) {
-          $scope.updateModel($scope.nav.topPage.data.randomhunt);
+          var hunt = $scope.nav.topPage.data.randomhunt;
+          $scope.updateModel(hunt);
       }
       else {
           $scope.nextHunt();

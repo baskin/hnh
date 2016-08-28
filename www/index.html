@@ -81,6 +81,11 @@
 <ons-template id="home.html">
     <ons-page ng-controller="homeController">
         <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="nav.pushPage('history.html')">
+                    <ons-icon size="35px" icon="fa-history"></ons-icon>
+                </ons-toolbar-button>
+            </div>
             <div class="center">
                 <ons-icon size="35px" icon="fa-product-hunt"></ons-icon>
                 HnH {{$storage.username}}
@@ -125,7 +130,7 @@
                 </div>
             </div>
             <ons-button id="hunt-summary-thumb" ng-click="nav.pushPage('hunt.html', {data: {randomhunt: randomhunt}})"> 
-                <img ng-src="{{randomhunt.thumbnail.image_url}}" alt="hunting for image..">
+                <img ng-src="{{randomhunt.thumbnail.image_url}}" my-src="{{randomhunt.thumbnail.image_url}}"  imageonload/>
             </ons-button>
             <div id="podcast" ng-if="randomhunt.hasAudio">
                 <audio controls>

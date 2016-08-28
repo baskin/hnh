@@ -86,14 +86,29 @@ body {
 }
 
 #hunt-summary-thumb {
-	max-width:     15em; 
-	max-height:    10em;
+	width:     15em; 
+	height:    10em;
 	position:      relative;
 	border:        2px solid #ddd;
     border-radius: 6px;
     padding:       5px;
     z-index:       5;
 }
+
+.loading { 
+	background-color: #ede9df;
+    background-image: url(../images/07-progress.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.summary-image-hide {
+    visibility: hidden;
+}
+.summary-image-show {
+    visibility: visible;
+}
+
 
 #hunt-summary-thumb img {
 	display:       block;
@@ -218,5 +233,4 @@ input[type=text] {
 #hunt-summary-share .fab {
 	background-color: #eb482f;
 }
-
 
