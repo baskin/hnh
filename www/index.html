@@ -109,7 +109,7 @@
         <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
             <section id="hunt-topics">
                 <span ng-repeat="topic in randomhunt.topics">
-                    <span class="notification">{{topic.name}}</span>
+                    <span class="notification">{{topic.slug}}</span>
                     <span>&nbsp;</span>
                 </span>
             </section>
@@ -130,7 +130,8 @@
                 </div>
             </div>
             <ons-button id="hunt-summary-thumb" ng-click="nav.pushPage('hunt.html', {data: {randomhunt: randomhunt}})"> 
-                <img ng-src="{{randomhunt.thumbnail.image_url}}" my-src="{{randomhunt.thumbnail.image_url}}"  imageonload/>
+                <img ng-src="{{randomhunt.thumbnail.image_url}}" imageonload/>
+                <span class="loading"></span>
             </ons-button>
             <div id="podcast" ng-if="randomhunt.hasAudio">
                 <audio controls>
@@ -359,7 +360,115 @@
           </ons-toolbar-button>
         </div>
       </ons-toolbar>
-      Chips
+
+      <ons-tabbar>
+          <ons-tab label="Time" page="time-filter.html" active>
+          </ons-tab>
+          <ons-tab label="Topics" page="topic-filter.html">
+          </ons-tab>
+          <ons-tab label="Collections" page="collection-filter.html">
+          </ons-tab>
+      </ons-tabbar>
+
+    </ons-page>
+</ons-template>
+
+<ons-template id="time-filter.html">
+    <ons-page ng-controller="filtersController">
+        <md-content layout-padding>
+            <div flex-gt-xs>
+                <h4>Created after</h4>
+                <md-datepicker ng-model="createdAfter" md-placeholder="Enter date" md-max-date="maxFilterDate"></md-datepicker>
+                <div>
+                <ons-button ng-click="applyFilters()">Apply</ons-button>
+                </div>
+            </div>
+        </md-content>
+    </ons-page>
+</ons-template>
+
+<ons-template id="topic-filter.html">
+    <ons-page ng-controller="filtersController">
+
+      <div layout="column" ng-cloak="" class="chips">
+          <md-content class="md-padding" layout="column">
+              <h4 class="md-title">Add upto 4 topic filters</h4>
+              <md-chips ng-model="filteredTopics" md-max-chips=4 md-on-add=applyFilters(); md-on-remove=applyFilters()>
+                  <md-chip-template>
+                      <strong>{{$chip.name}}</strong>
+                  </md-chip-template>
+              </md-chips>
+          </md-content>
+          <br>
+
+          <ons-list-header>Trending topics (click to add)</ons-list-header>
+          <ons-list class="history" modifier="inset">
+              <ons-list-item class="history-li" modifier="tappable" ng-repeat="topic in trendingTopics" ng-click="push2ArrayUnique(filteredTopics, topic, 4)">
+                <ons-row>
+                  <ons-col width="50px">
+                      <img ng-src="{{topic.image}}" class="history-image">
+                  </ons-col>
+
+                  <ons-col>
+                    <div class="history-date">
+                        <div>
+                            {{topic.posts_count}}
+                        </div>
+                    </div>
+                    <div class="history-from">
+                      <span class="history-name">{{topic.name}}</span>
+                    </div>
+                    <div class="history-message">
+                      {{topic.description}}
+                    </div>
+                  </ons-col>
+                </ons-row>
+              </ons-list-item>
+          </ons-list>
+      </div>
+
+    </ons-page>
+</ons-template>
+
+<ons-template id="collection-filter.html">
+    <ons-page ng-controller="filtersController">
+
+      <div layout="column" ng-cloak="" class="chips">
+        <md-content class="md-padding" layout="column">
+            <h2 class="md-title">Select 1 collection</h2>
+            <md-chips ng-model="filteredCollections" md-max-chips=1 md-on-add=applyFilters(); md-on-remove=applyFilters()>
+                <md-chip-template>
+                    <strong>{{$chip.name}}</strong>
+                </md-chip-template>
+            </md-chips>
+            <br>
+        </md-content>
+
+        <ons-list-header>Featured Collections (click to add)</ons-list-header>
+        <ons-list class="history" modifier="inset">
+          <ons-list-item class="history-li" modifier="tappable" ng-repeat="collection in $storage.featuredCollections" ng-click="push2ArrayUnique(filteredCollections, collection, 1)">
+            <ons-row>
+              <ons-col width="50px">
+                <img ng-src="{{collection.background_image_url}}" class="history-image">
+              </ons-col>
+
+              <ons-col>
+                <div class="history-date">
+                    <div>
+                        {{collection.posts_count}}
+                    </div>
+                </div>
+                <div class="history-from">
+                  <span class="history-name">{{collection.name}}</span>
+                </div>
+                <div class="history-message">
+                  {{collection.title}}
+                </div>
+              </ons-col>
+            </ons-row>
+          </ons-list-item>
+        </ons-list>
+      </div>
     </ons-page>
 </ons-template>
 

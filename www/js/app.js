@@ -42,16 +42,18 @@ module.directive('imageonload', function() {
         link: function(scope, element) {
           element.on('load', function() {
               // Set visibility: true + remove spinner overlay
-              element.removeClass('summary-image-hide');
-              element.removeClass('loading');
-              element.addClass('summary-image-show');
+              element.removeClass('image-hide');
+              element.addClass('image-show');
+              element.parent().find('span').removeClass('image-show');
+              element.parent().find('span').addClass('image-hide');
               console.log("Summary image loaded");
           });
           scope.$watch('ngSrc', function() {
               // Set visibility: false + inject temporary spinner overlay
-              element.addClass('loading');
-              element.addClass('summary-image-hide');
-              element.removeClass('summary-image-show');
+              element.parent().find('span').addClass('image-show');
+              element.parent().find('span').removeClass('image-hide');
+              element.addClass('image-hide');
+              element.removeClass('image-show');
               console.log("Summary image src changed");
           });
         }
@@ -122,14 +124,87 @@ module.service('bookmarksService', function($localStorage) {
 
 module.service('randomHuntService', function($http, $localStorage) {
 
+    var URL = "https://api.producthunt.com/v1/";
+    var HEADER_OPTIONS = {
+        headers: {
+            "Authorization": "Bearer fbf62059f1556488e5354cd3892095e35ac776e93769efc2a446df35db8b7e6c"
+        }
+    };
+
     var HUNTQ_IDLE_SIZE = 25;
+    var TRENDING_TOPICS_TTL_HOURS = 2;
+    var FEATURED_COLLECTIONS_TTL_HOURS = 2;
+
     $localStorage.$default({
         huntq: [],
         filter: {
             topics : [],
-            createdAfter : new Date(2014, 01, 01).toISOString()
-        }
+            collections : [],
+            createdAfter : new Date(2015, 01, 01).toISOString()
+        },
+        trendingTopics: [],
+        trendingTopicsUpdateTime: new Date(2015, 01, 01).toISOString(),
+        featuredCollections: [],
+        featuredCollectionsUpdateTime: new Date(2015, 01, 01).toISOString()
     });
+
+    this.featuredCollections = function($success, $failure) {
+        var hoursAgo = Math.round((Date.now() - new Date($localStorage.featuredCollectionsUpdateTime))/(1000*60*60));
+        if (hoursAgo > FEATURED_COLLECTIONS_TTL_HOURS) {
+            var url = URL + "collections?search[featured]=true";
+            var future = $http.get(url, HEADER_OPTIONS);
+            future.then(
+                function(response) {
+                    console.log("Received success from url " + url);
+                    var collections = response.data['collections'];
+                    console.log("Fetched " + collections.length + " featured collections");
+                    $localStorage.featuredCollections = collections;
+                    $localStorage.featuredCollectionsUpdateTime = new Date(Date.now()).toISOString();
+                    if ($success != null) {
+                        $success(collections);
+                    }
+                },
+                function(response) {
+                    console.error("Received error from url " + url + " with error:" +  response.statustext);
+                    if ($failure != null) {
+                        $failure();
+                    }
+                }
+            );
+        }
+        else {
+            return $success($localStorage.featuredCollections);
+        }
+    }
+
+    this.trendingTopics = function($success, $failure) {
+        var hoursAgo = Math.round((Date.now() - new Date($localStorage.trendingTopicsUpdateTime))/(1000*60*60));
+        if (hoursAgo > TRENDING_TOPICS_TTL_HOURS) {
+            var url = URL + "topics?search[trending]=true";
+            var future = $http.get(url, HEADER_OPTIONS);
+            future.then(
+                function(response) {
+                    console.log("Received success from url " + url);
+                    var topics = response.data['topics'];
+                    console.log("Fetched " + topics.length + " trending topics");
+                    $localStorage.trendingTopics = topics;
+                    $localStorage.trendingTopicsUpdateTime = new Date(Date.now()).toISOString();
+                    if ($success != null) {
+                        $success(topics);
+                    }
+                },
+                function(response) {
+                    console.error("Received error from url " + url + " with error:" +  response.statustext);
+                    if ($failure != null) {
+                        $failure();
+                    }
+                }
+            );
+        }
+        else {
+            return $success($localStorage.trendingTopics);
+        }
+    }
 
     var topicFilterOk = function(hunt, topics) {
         // topic filter
@@ -161,7 +236,7 @@ module.service('randomHuntService', function($http, $localStorage) {
 
     // private
     this.applyFilter = function(filter) {
-        console.log("Applying filter " + filter + " on huntq");
+        console.log("Applying filter {" + filter.topics + ", " + filter.createdAfter + "} on huntq");
         var huntQ = $localStorage.huntq;
         var updatedHuntQ = []
         for(var i in huntQ) {
@@ -180,6 +255,10 @@ module.service('randomHuntService', function($http, $localStorage) {
         this.applyFilter($localStorage.filter)
     }
 
+    this.getFilter = function(type) {
+        return $localStorage.filter[type];
+    }
+
     var shufffle = function(a) {
       var j, x, i;
       for (i = a.length; i; i--) {
@@ -190,7 +269,6 @@ module.service('randomHuntService', function($http, $localStorage) {
       }
     }
 
-
     this.sync = function($done) {
 
       if ($localStorage.huntq.length >= HUNTQ_IDLE_SIZE) {
@@ -200,8 +278,7 @@ module.service('randomHuntService', function($http, $localStorage) {
           return;
       }
       console.log("Updating HuntQ...")
-      var url = "https://api.producthunt.com/v1/posts";
-      topicFilter = false;
+      var url = URL + "posts";
       if ($localStorage.filter.topics.length > 0) {
           url = url + "/all?search[topic]=" + $localStorage.filter.topics[0].id; // 208;
       }
@@ -211,13 +288,8 @@ module.service('randomHuntService', function($http, $localStorage) {
           var daysAgo = Math.floor(Math.random() * daysBetween);
           url = url + "?days_ago=" + daysAgo;
       }
-      var headerOptions = {
-          headers: {
-              "Authorization": "Bearer fbf62059f1556488e5354cd3892095e35ac776e93769efc2a446df35db8b7e6c"
-          }
-      };
 
-      $http.get(url, headerOptions).then(
+      $http.get(url, HEADER_OPTIONS).then(
         function(response) {
           console.log("Received success from url " + url);
             // First function handles success
@@ -225,6 +297,7 @@ module.service('randomHuntService', function($http, $localStorage) {
             console.log("Fetched " + body.length + " hunts");
             shufffle(body);
             body = body.slice(0, 10); // reduce size from single response
+            // TODO first remove read hunts.
             console.log("Retained " + body.length + " random hunts");
             $localStorage.huntq = $localStorage.huntq.concat(body);
             console.log("New HuntQ size " + $localStorage.huntq.length);
