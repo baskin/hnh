@@ -9,14 +9,20 @@ module.controller('filtersController', function($scope, randomHuntService) {
     randomHuntService.featuredCollections(function(collections) {
     	$scope.featuredCollections = collections;
     });
-    $scope.filteredCollections = [randomHuntService.getFilter("collection")];
+    $scope.filteredCollections = randomHuntService.getFilter("collections");
 
     $scope.createdAfter = new Date(randomHuntService.getFilter("createdAfter"));
     $scope.maxFilterDate = new Date(Date.now());
 
-    $scope.applyFilters = function() {
+    $scope.applyTopicFilters = function() {
     	randomHuntService.setFilter("topics", $scope.filteredTopics);
+    }
+
+    $scope.applyCollectionFilters = function() {
     	randomHuntService.setFilter("collections", $scope.filteredCollections);
+    }
+
+    $scope.applyTimeFilters = function(dateCreatedAfter) {
     	randomHuntService.setFilter("createdAfter", $scope.createdAfter);
     }
 

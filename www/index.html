@@ -257,13 +257,19 @@
             </div>
             <div class="right">
               <ons-toolbar-button ng-click="nav.pushPage('settings.html')">
-                <ons-icon size="35px" icon="fa-gear"></ons-icon>
+                  <ons-icon size="35px" icon="fa-gear"></ons-icon>
               </ons-toolbar-button>
             </div>
         </ons-toolbar>
 
+        <ons-range style="width: 80%;" ng-model="historyMaxSize" min=10 max=100 step=5></ons-range>
+        <h4>History Size: {{historyMaxSize}}</h4>
+        <div>
+            <ons-button ng-click="applyHistorySize(historyMaxSize)">Apply</ons-button>
+        </div>
+
         <ons-list class="history" modifier="inset">
-          <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in $storage.history" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
+          <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in allHistory" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
             <ons-row>
               <ons-col width="50px">
                 <img ng-src="{{hunt.thumbnail.image_url}}" class="history-image">
@@ -374,13 +380,13 @@
 </ons-template>
 
 <ons-template id="time-filter.html">
-    <ons-page ng-controller="filtersController">
+    <ons-page>
         <md-content layout-padding>
             <div flex-gt-xs>
                 <h4>Created after</h4>
                 <md-datepicker ng-model="createdAfter" md-placeholder="Enter date" md-max-date="maxFilterDate"></md-datepicker>
                 <div>
-                <ons-button ng-click="applyFilters()">Apply</ons-button>
+                    <ons-button ng-click="applyTimeFilters()">Apply</ons-button>
                 </div>
             </div>
         </md-content>
@@ -388,16 +394,19 @@
 </ons-template>
 
 <ons-template id="topic-filter.html">
-    <ons-page ng-controller="filtersController">
+    <ons-page>
 
       <div layout="column" ng-cloak="" class="chips">
           <md-content class="md-padding" layout="column">
               <h4 class="md-title">Add upto 4 topic filters</h4>
-              <md-chips ng-model="filteredTopics" md-max-chips=4 md-on-add=applyFilters(); md-on-remove=applyFilters()>
+              <md-chips ng-model="filteredTopics" md-max-chips=4>
                   <md-chip-template>
                       <strong>{{$chip.name}}</strong>
                   </md-chip-template>
               </md-chips>
+              <div>
+                    <ons-button ng-click="applyTopicFilters()">Apply</ons-button>
+              </div>
           </md-content>
           <br>
 
@@ -431,17 +440,19 @@
 </ons-template>
 
 <ons-template id="collection-filter.html">
-    <ons-page ng-controller="filtersController">
+    <ons-page>
 
       <div layout="column" ng-cloak="" class="chips">
         <md-content class="md-padding" layout="column">
             <h2 class="md-title">Select 1 collection</h2>
-            <md-chips ng-model="filteredCollections" md-max-chips=1 md-on-add=applyFilters(); md-on-remove=applyFilters()>
+            <md-chips ng-model="filteredCollections" md-max-chips=1>
                 <md-chip-template>
                     <strong>{{$chip.name}}</strong>
                 </md-chip-template>
             </md-chips>
-            <br>
+            <div>
+                <ons-button ng-click="applyCollectionFilters()">Apply</ons-button>
+            </div>
         </md-content>
 
         <ons-list-header>Featured Collections (click to add)</ons-list-header>
@@ -462,7 +473,7 @@
                   <span class="history-name">{{collection.name}}</span>
                 </div>
                 <div class="history-message">
-                  {{collection.title}}
+                    {{collection.title}}
                 </div>
               </ons-col>
             </ons-row>

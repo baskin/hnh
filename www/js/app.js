@@ -62,10 +62,9 @@ module.directive('imageonload', function() {
 
 module.service('historyService', function($localStorage) {
 
-    var HISTORY_SIZE = 25;
-
     $localStorage.$default({
-        history: []
+        history: [],
+        historyMaxSize: 25
     });
 
     this.add = function(hunt) {
@@ -83,7 +82,7 @@ module.service('historyService', function($localStorage) {
         }
         // push to front
         h.unshift(hunt);
-        if (h.length > HISTORY_SIZE) {
+        if (h.length > this.maxSize()) {
             // history size full, pop
             h.pop();
         }
@@ -92,6 +91,19 @@ module.service('historyService', function($localStorage) {
 
     this.getAll = function() {
         return $localStorage.history;
+    }
+
+    this.maxSize = function() {
+        return $localStorage.historyMaxSize;
+    }
+
+    this.applyHistorySize = function(sz) {
+        if (sz < $localStorage.history.length) {
+            // trim down history
+            console.log("Trimming history to sz:" + sz);
+            $localStorage.history = $localStorage.history.slice(0, sz);
+        }
+        $localStorage.historyMaxSize = sz;
     }
 
 });
@@ -132,8 +144,8 @@ module.service('randomHuntService', function($http, $localStorage) {
     };
 
     var HUNTQ_IDLE_SIZE = 25;
-    var TRENDING_TOPICS_TTL_HOURS = 2;
-    var FEATURED_COLLECTIONS_TTL_HOURS = 2;
+    var TRENDING_TOPICS_TTL_HOURS = 12;
+    var FEATURED_COLLECTIONS_TTL_HOURS = 12;
 
     $localStorage.$default({
         huntq: [],
@@ -151,7 +163,7 @@ module.service('randomHuntService', function($http, $localStorage) {
     this.featuredCollections = function($success, $failure) {
         var hoursAgo = Math.round((Date.now() - new Date($localStorage.featuredCollectionsUpdateTime))/(1000*60*60));
         if (hoursAgo > FEATURED_COLLECTIONS_TTL_HOURS) {
-            var url = URL + "collections?search[featured]=true";
+            var url = URL + "collections?search[featured]=true&sort_by=featured_at";
             var future = $http.get(url, HEADER_OPTIONS);
             future.then(
                 function(response) {
@@ -226,9 +238,16 @@ module.service('randomHuntService', function($http, $localStorage) {
         return (new Date(hunt.created_at).getTime() >= new Date(createdAfter).getTime());
     }
 
+    var collectionFilterOk = function(hunt, collections) {
+        if (collections.length == 0) {
+            return true; // nothing to filter
+        }
+        return false;
+    }
+
      // private
     this.include = function(hunt, filter) {
-      if (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics)) {
+      if (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics) && collectionFilterOk(hunt, filter.collections)) {
           return true;
       }
       return false;
@@ -278,27 +297,40 @@ module.service('randomHuntService', function($http, $localStorage) {
           return;
       }
       console.log("Updating HuntQ...")
-      var url = URL + "posts";
-      if ($localStorage.filter.topics.length > 0) {
-          url = url + "/all?search[topic]=" + $localStorage.filter.topics[0].id; // 208;
+      var url = "";
+      var reduceResponseSize = false;
+      var fromCollections = false;
+      if ($localStorage.filter.collections.length > 0) {
+          url = URL + "collections/" + $localStorage.filter.collections[0].id;
+          fromCollections = true;
+      }
+      else if ($localStorage.filter.topics.length > 0) {
+          url = URL + "posts/all?search[topic]=" + $localStorage.filter.topics[0].id;
+          reduceResponseSize = true;
       }
       else {
-          // daysBetween = 365
+          reduceResponseSize = true;
           var daysBetween = Math.round((Date.now() - new Date($localStorage.filter.createdAfter))/(1000*60*60*24));
           var daysAgo = Math.floor(Math.random() * daysBetween);
-          url = url + "?days_ago=" + daysAgo;
+          url = URL + "posts?days_ago=" + daysAgo;
       }
 
       $http.get(url, HEADER_OPTIONS).then(
         function(response) {
-          console.log("Received success from url " + url);
+            console.log("Received success from url " + url);
             // First function handles success
             body = response.data['posts'];
+            if (fromCollections) {
+                body = response.data['collection']['posts'];
+            }
             console.log("Fetched " + body.length + " hunts");
             shufffle(body);
-            body = body.slice(0, 10); // reduce size from single response
+            // reduce size from single response
             // TODO first remove read hunts.
-            console.log("Retained " + body.length + " random hunts");
+            if (reduceResponseSize) {
+                body = body.slice(0, 10);
+                console.log("Retained " + body.length + " random hunts");
+            }
             $localStorage.huntq = $localStorage.huntq.concat(body);
             console.log("New HuntQ size " + $localStorage.huntq.length);
             if ($done != null) {

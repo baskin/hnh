@@ -72,6 +72,7 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       if ($scope.nav.topPage.data != null && $scope.nav.topPage.data.randomhunt != null) {
           var hunt = $scope.nav.topPage.data.randomhunt;
           $scope.updateModel(hunt);
+          $scope.showFab = true;
       }
       else {
           $scope.nextHunt();
