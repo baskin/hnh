@@ -152,16 +152,16 @@ module.service('randomHuntService', function($http, $localStorage) {
         filter: {
             topics : [],
             collections : [],
-            createdAfter : new Date(2015, 01, 01).toISOString()
+            createdAfter : new Date(2015, 01, 01)
         },
         trendingTopics: [],
-        trendingTopicsUpdateTime: new Date(2015, 01, 01).toISOString(),
+        trendingTopicsUpdateTime: new Date(2015, 01, 01),
         featuredCollections: [],
-        featuredCollectionsUpdateTime: new Date(2015, 01, 01).toISOString()
+        featuredCollectionsUpdateTime: new Date(2015, 01, 01)
     });
 
     this.featuredCollections = function($success, $failure) {
-        var hoursAgo = Math.round((Date.now() - new Date($localStorage.featuredCollectionsUpdateTime))/(1000*60*60));
+        var hoursAgo = Math.round((Date.now() - $localStorage.featuredCollectionsUpdateTime)/(1000*60*60));
         if (hoursAgo > FEATURED_COLLECTIONS_TTL_HOURS) {
             var url = URL + "collections?search[featured]=true&sort_by=featured_at";
             var future = $http.get(url, HEADER_OPTIONS);
@@ -171,7 +171,7 @@ module.service('randomHuntService', function($http, $localStorage) {
                     var collections = response.data['collections'];
                     console.log("Fetched " + collections.length + " featured collections");
                     $localStorage.featuredCollections = collections;
-                    $localStorage.featuredCollectionsUpdateTime = new Date(Date.now()).toISOString();
+                    $localStorage.featuredCollectionsUpdateTime = new Date(Date.now());
                     if ($success != null) {
                         $success(collections);
                     }
@@ -190,7 +190,7 @@ module.service('randomHuntService', function($http, $localStorage) {
     }
 
     this.trendingTopics = function($success, $failure) {
-        var hoursAgo = Math.round((Date.now() - new Date($localStorage.trendingTopicsUpdateTime))/(1000*60*60));
+        var hoursAgo = Math.round((Date.now() - $localStorage.trendingTopicsUpdateTime)/(1000*60*60));
         if (hoursAgo > TRENDING_TOPICS_TTL_HOURS) {
             var url = URL + "topics?search[trending]=true";
             var future = $http.get(url, HEADER_OPTIONS);
@@ -200,7 +200,7 @@ module.service('randomHuntService', function($http, $localStorage) {
                     var topics = response.data['topics'];
                     console.log("Fetched " + topics.length + " trending topics");
                     $localStorage.trendingTopics = topics;
-                    $localStorage.trendingTopicsUpdateTime = new Date(Date.now()).toISOString();
+                    $localStorage.trendingTopicsUpdateTime = new Date(Date.now());
                     if ($success != null) {
                         $success(topics);
                     }
@@ -235,7 +235,7 @@ module.service('randomHuntService', function($http, $localStorage) {
     }
 
     var dateFilterOk = function(hunt, createdAfter) {
-        return (new Date(hunt.created_at).getTime() >= new Date(createdAfter).getTime());
+        return (new Date(hunt.created_at).getTime() >= createdAfter.getTime());
     }
 
     var collectionFilterOk = function(hunt, collections) {
@@ -246,32 +246,34 @@ module.service('randomHuntService', function($http, $localStorage) {
     }
 
      // private
-    this.include = function(hunt, filter) {
+    var include = function(hunt, filter) {
       if (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics) && collectionFilterOk(hunt, filter.collections)) {
           return true;
       }
       return false;
     }
 
-    // private
-    this.applyFilter = function(filter) {
-        console.log("Applying filter {" + filter.topics + ", " + filter.createdAfter + "} on huntq");
+    var applyFilterInner = function(filter) {
+        console.log("Applying filter {" + filter.topics + ", " + filter.collections + ", " + filter.createdAfter + "} on huntq");
         var huntQ = $localStorage.huntq;
         var updatedHuntQ = []
         for(var i in huntQ) {
-            if (this.include(huntQ[i], filter)) {
+            if (include(huntQ[i], filter)) {
                 updatedHuntQ.push(huntQ[i]);
             }
         }
         console.log("Reduced HuntQ size from " + $localStorage.huntq.length + " to " + updatedHuntQ.length);
         $localStorage.huntq = updatedHuntQ;
-        this.sync();
     }
 
     this.setFilter = function(type, filter) {
         console.log("Setting filter of type " + type);
         $localStorage.filter[type] = filter;
-        this.applyFilter($localStorage.filter)
+    }
+
+    this.applyFilter = function(type, filter) {
+        applyFilterInner($localStorage.filter);
+        this.sync();
     }
 
     this.getFilter = function(type) {
@@ -310,7 +312,7 @@ module.service('randomHuntService', function($http, $localStorage) {
       }
       else {
           reduceResponseSize = true;
-          var daysBetween = Math.round((Date.now() - new Date($localStorage.filter.createdAfter))/(1000*60*60*24));
+          var daysBetween = Math.round((Date.now() - $localStorage.filter.createdAfter)/(1000*60*60*24));
           var daysAgo = Math.floor(Math.random() * daysBetween);
           url = URL + "posts?days_ago=" + daysAgo;
       }

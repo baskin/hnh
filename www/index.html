@@ -162,17 +162,17 @@
                 </span>
             </div>
 
-            <ons-speed-dial id="hunt-summary-share" position="bottom right" direction="left" ng-show="showFab">
-                <ons-fab>
+            <ons-speed-dial ripple id="hunt-summary-share" position="bottom right" direction="left" ng-show="showFab">
+                <ons-fab ripple>
                   <ons-icon icon="md-share"></ons-icon>
                 </ons-fab>
-                <ons-speed-dial-item>
+                <ons-speed-dial-item ripple>
                   <ons-icon icon="md-twitter"></ons-icon>
                 </ons-speed-dial-item>
-                <ons-speed-dial-item>
+                <ons-speed-dial-item ripple>
                   <ons-icon icon="md-facebook"></ons-icon>
                 </ons-speed-dial-item>
-                <ons-speed-dial-item>
+                <ons-speed-dial-item ripple>
                   <ons-icon icon="md-whatsapp"></ons-icon>
                 </ons-speed-dial-item>
             </ons-speed-dial>
@@ -262,11 +262,22 @@
             </div>
         </ons-toolbar>
 
-        <ons-range style="width: 80%;" ng-model="historyMaxSize" min=10 max=100 step=5></ons-range>
-        <h4>History Size: {{historyMaxSize}}</h4>
-        <div>
-            <ons-button ng-click="applyHistorySize(historyMaxSize)">Apply</ons-button>
-        </div>
+        <div class="settings-header">History Settings</div>
+        <ons-list modifier="inset" class="settings-list">
+            <ons-list-item>
+                <ons-row>
+                <ons-col>Max Size {{historyMaxSize}}</ons-col>
+                <ons-col>
+                    <ons-range style="width: 50%;" ng-model="historyMaxSize" min=10 max=100 step=5></ons-range>
+                </ons-col>
+                <ons-col>
+                    <ons-button modifier="quiet" ripple ng-click="applyHistorySize(historyMaxSize)">
+                      <ons-icon icon="fa-save"></ons-icon>
+                    </ons-button>
+                </ons-col>
+                </ons-row>
+            </ons-list-item>
+        </ons-list>
 
         <ons-list class="history" modifier="inset">
           <ons-list-item class="history-li" modifier="tappable" ng-repeat="hunt in allHistory" ng-click="nav.pushPage('home.html', {data: {randomhunt: hunt}})">
@@ -367,8 +378,8 @@
         </div>
       </ons-toolbar>
 
-      <ons-tabbar>
-          <ons-tab label="Time" page="time-filter.html" active>
+      <ons-tabbar animation="slide" var="filterTab">
+          <ons-tab label="Summary" page="filter-summary.html" active>
           </ons-tab>
           <ons-tab label="Topics" page="topic-filter.html">
           </ons-tab>
@@ -379,40 +390,75 @@
     </ons-page>
 </ons-template>
 
-<ons-template id="time-filter.html">
+<ons-template id="filter-summary.html">
     <ons-page>
-        <md-content layout-padding>
-            <div flex-gt-xs>
-                <h4>Created after</h4>
-                <md-datepicker ng-model="createdAfter" md-placeholder="Enter date" md-max-date="maxFilterDate"></md-datepicker>
-                <div>
-                    <ons-button ng-click="applyTimeFilters()">Apply</ons-button>
-                </div>
-            </div>
-        </md-content>
+        <div class="settings-header">Time Filter</div>
+        <ons-list modifier="inset" class="settings-list">
+            <ons-list-item>
+                <span>Created After</span>
+                <span>
+                    <md-content>
+                        <md-datepicker ng-model="createdAfter" md-placeholder="Enter date" md-max-date="maxFilterDate"></md-datepicker>
+                    </md-content>
+                </span>
+            </ons-list-item>
+        </ons-list> 
+        <div class="settings-header">Content Filter</div>
+        <ons-list modifier="inset" class="settings-list" tappable>
+            <ons-list-item>
+                <label class="left">
+                    <ons-input name="content-filter" type="radio" input-id="radio-topic" value="topic"></ons-input>
+                </label>
+                <label for="radio-topic" class="center">
+                    Topic
+                </label>
+                <ons-button class="right" ng-click="filterTab.setActiveTab(1)">
+                    <ons-icon icon="fa-edit"></ons-icon>
+                </ons-button>
+            </ons-list-item>
+            <ons-list-item>
+                <label class="left">
+                    <ons-input name="content-filter" type="radio" input-id="radio-collection" value="collection"></ons-input>
+                </label>
+                <label for="radio-collection" class="center">
+                    Collection
+                </label>
+                <ons-button class="right" ng-click="filterTab.setActiveTab(2)">
+                    <ons-icon icon="fa-edit"></ons-icon>
+                </ons-button>
+            </ons-list-item>
+        </ons-list>
+        <br>
+        <div>
+            <ons-button ripple ng-click="applyFilter(createdAfter)">
+                Apply Filters
+            </ons-button>
+        </div>
+
     </ons-page>
 </ons-template>
 
 <ons-template id="topic-filter.html">
     <ons-page>
 
-      <div layout="column" ng-cloak="" class="chips">
-          <md-content class="md-padding" layout="column">
-              <h4 class="md-title">Add upto 4 topic filters</h4>
-              <md-chips ng-model="filteredTopics" md-max-chips=4>
-                  <md-chip-template>
-                      <strong>{{$chip.name}}</strong>
-                  </md-chip-template>
-              </md-chips>
-              <div>
-                    <ons-button ng-click="applyTopicFilters()">Apply</ons-button>
+        <div class="settings-header">Add upto 4 topic filters</div>
+        <ons-list modifier="inset" class="settings-list">
+            <ons-list-item>
+              <div layout="column" ng-cloak="" class="chips">
+                  <md-content class="md-padding" layout="column">
+                      <md-chips ng-model="filteredTopics" md-max-chips=4 readonly="false" md-removable="true"> <!-- TODO readonly=true -->
+                          <md-chip-template style="font-size: 80%;">
+                              <strong>{{$chip.name}}</strong>
+                          </md-chip-template>
+                      </md-chips>
+                  </md-content>
               </div>
-          </md-content>
-          <br>
+            </ons-list-item>
+        </ons-list>
 
           <ons-list-header>Trending topics (click to add)</ons-list-header>
           <ons-list class="history" modifier="inset">
-              <ons-list-item class="history-li" modifier="tappable" ng-repeat="topic in trendingTopics" ng-click="push2ArrayUnique(filteredTopics, topic, 4)">
+              <ons-list-item ripple class="history-li" modifier="tappable" ng-repeat="topic in trendingTopics" ng-click="push2ArrayUnique(filteredTopics, topic, 4)">
                 <ons-row>
                   <ons-col width="50px">
                       <img ng-src="{{topic.image}}" class="history-image">
@@ -442,22 +488,24 @@
 <ons-template id="collection-filter.html">
     <ons-page>
 
-      <div layout="column" ng-cloak="" class="chips">
-        <md-content class="md-padding" layout="column">
-            <h2 class="md-title">Select 1 collection</h2>
-            <md-chips ng-model="filteredCollections" md-max-chips=1>
-                <md-chip-template>
-                    <strong>{{$chip.name}}</strong>
-                </md-chip-template>
-            </md-chips>
-            <div>
-                <ons-button ng-click="applyCollectionFilters()">Apply</ons-button>
-            </div>
-        </md-content>
+        <div class="settings-header">Select 1 collection</div>
+        <ons-list modifier="inset" class="settings-list">
+            <ons-list-item>
+              <div layout="column" ng-cloak="" class="chips">
+                  <md-content class="md-padding" layout="column">
+                      <md-chips ng-model="filteredCollections" md-max-chips=1 md-removable="true" readonly="false"> <!-- TODO readonly=true -->
+                          <md-chip-template style="font-size: 80%;">
+                              <strong>{{$chip.name}}</strong>
+                          </md-chip-template>
+                      </md-chips>
+                  </md-content>
+              </div>
+            </ons-list-item>
+        </ons-list>
 
         <ons-list-header>Featured Collections (click to add)</ons-list-header>
         <ons-list class="history" modifier="inset">
-          <ons-list-item class="history-li" modifier="tappable" ng-repeat="collection in $storage.featuredCollections" ng-click="push2ArrayUnique(filteredCollections, collection, 1)">
+          <ons-list-item ripple class="history-li" modifier="tappable" ng-repeat="collection in $storage.featuredCollections" ng-click="push2ArrayUnique(filteredCollections, collection, 1)">
             <ons-row>
               <ons-col width="50px">
                 <img ng-src="{{collection.background_image_url}}" class="history-image">

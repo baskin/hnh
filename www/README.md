@@ -1,9 +1,7 @@
 # Welcome to HnH based on OnsenUI 2.
 
-- add collections page
 - add filters page
 - add tutorial page
-- add favs page
 - hunq: keep ts with each hunt
    - expire old ones
    - save image with each hunt for offline mode
@@ -11,15 +9,11 @@
 - welcome
   - configure button on welcome page not working
   - welcome splash: show total hunts, total favs
-  - welcome splash: show did you know
+  - welcome splash: show "did you know"
 - home
-  - show image placeholder
-  - reset image, and iframe on pull to refresh
   - different layout for landscape
-  - save fav
   - share
   - see comments
-  - show time created
   - iframe issue: allow page to open in new page
 - history
   - remove from history button
@@ -36,3 +30,4 @@
 - js doesn't fire when app comes on foreground again
 - save prefs, history, bookmarks to drive
 - live events https://api.producthunt.com/v1/docs/live_events/
+- audio doesn't stop on navigating away. Ability to play in bkground?

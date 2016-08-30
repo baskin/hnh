@@ -14,16 +14,9 @@ module.controller('filtersController', function($scope, randomHuntService) {
     $scope.createdAfter = new Date(randomHuntService.getFilter("createdAfter"));
     $scope.maxFilterDate = new Date(Date.now());
 
-    $scope.applyTopicFilters = function() {
-    	randomHuntService.setFilter("topics", $scope.filteredTopics);
-    }
-
-    $scope.applyCollectionFilters = function() {
-    	randomHuntService.setFilter("collections", $scope.filteredCollections);
-    }
-
-    $scope.applyTimeFilters = function(dateCreatedAfter) {
-    	randomHuntService.setFilter("createdAfter", $scope.createdAfter);
+    $scope.applyFilter = function(createdAfter) {
+        randomHuntService.setFilter("createdAfter", createdAfter);
+        randomHuntService.applyFilter();
     }
 
     $scope.push2ArrayUnique = function(array, element, maxsize) {
