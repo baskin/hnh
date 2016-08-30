@@ -31,3 +31,4 @@
 - save prefs, history, bookmarks to drive
 - live events https://api.producthunt.com/v1/docs/live_events/
 - audio doesn't stop on navigating away. Ability to play in bkground?
+- reduce storage size

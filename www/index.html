@@ -106,6 +106,17 @@
             </span>
         </ons-pull-hook>
 
+        <div class="absolute-center" id="hunt-error" ng-show="error">
+            <ons-list tappable modifier="inset" class="settings-list">
+                <ons-list-header>
+                <ons-icon icon="fa-warning"></ons-icon>&nbsp;No products to show. Try to</ons-list-header>
+                <ons-list-item ng-click="nav.pushPage('filters.html')">Relax the current filters</ons-list-item>
+                <ons-list-item>Connect to the internet</ons-list-item>
+                <ons-list-item ng-click="nav.pushPage('bookmarks.html')">Browse {{bookmarkCount}} bookmarked items</ons-list-item>
+                <ons-list-item ng-click="nav.pushPage('history.html')">Browse {{historyCount}} history items</ons-list-item>
+            </ons-list>
+        </div>
+
         <div class="absolute-center" id="hunt-summary" ng-show="randomhunt != null">
             <section id="hunt-topics">
                 <span ng-repeat="topic in randomhunt.topics">
@@ -406,31 +417,33 @@
         <div class="settings-header">Content Filter</div>
         <ons-list modifier="inset" class="settings-list" tappable>
             <ons-list-item>
-                <label class="left">
-                    <ons-input name="content-filter" type="radio" input-id="radio-topic" value="topic"></ons-input>
-                </label>
                 <label for="radio-topic" class="center">
-                    Topic
+                    Topic&nbsp;<span class="settings-list-item-summary">({{filteredTopics[0].name}})</span>
                 </label>
                 <ons-button class="right" ng-click="filterTab.setActiveTab(1)">
                     <ons-icon icon="fa-edit"></ons-icon>
                 </ons-button>
             </ons-list-item>
             <ons-list-item>
-                <label class="left">
-                    <ons-input name="content-filter" type="radio" input-id="radio-collection" value="collection"></ons-input>
-                </label>
                 <label for="radio-collection" class="center">
-                    Collection
+                    Collection&nbsp;<span class="settings-list-item-summary">{{filteredCollections[0].name}}</span>
                 </label>
                 <ons-button class="right" ng-click="filterTab.setActiveTab(2)">
                     <ons-icon icon="fa-edit"></ons-icon>
                 </ons-button>
             </ons-list-item>
+            <ons-list-item>
+                <label for="radio-collection" class="center">
+                    Bookmarked&nbsp;<span class="settings-list-item-summary">{{bookmarksCount}} bookmarks</span>
+                </label>
+                <label class="right">
+                    <ons-input type="checkbox" input-id="check-bookmarked" ng-model="bookmarkedOnly"></ons-input>
+                </label>
+            </ons-list-item>
         </ons-list>
         <br>
         <div>
-            <ons-button ripple ng-click="applyFilter(createdAfter)">
+            <ons-button ripple ng-click="applyFilter(createdAfter, bookmarkedOnly)">
                 Apply Filters
             </ons-button>
         </div>
@@ -548,7 +561,7 @@
           </ons-toolbar-button>
         </div>
       </ons-toolbar>
-      <div class="center">
+      <div class="absolute-center">
       <h3>
           Bhupinder Garg © 2016
       <br/>

@@ -267,3 +267,8 @@ input[type=text] {
 .switch--list-item {
     margin-right: 0px;
 }
+
+.settings-list-item-summary {
+    font-size: 12px;
+    opacity: 0.4;
+}

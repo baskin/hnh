@@ -32,8 +32,15 @@ module.controller('homeController', function($scope, $http, $location, randomHun
       setTimeout(function() { 
           var hunt = randomHuntService.next();
           if (hunt != null) {
+              $scope.error = false;
               $scope.updateModel(hunt, $done);
               $scope.showFab = true;
+          }
+          else {
+              $scope.error = true;
+              if ($done != null) {
+                  $done();
+              }
           }
       }, $delay);
   }
@@ -68,6 +75,8 @@ module.controller('homeController', function($scope, $http, $location, randomHun
 
   ons.ready(function() {
       console.log("HomeController loaded");
+      $scope.historyCount = historyService.count();
+      $scope.bookmarkCount = bookmarksService.count();
       
       if ($scope.nav.topPage.data != null && $scope.nav.topPage.data.randomhunt != null) {
           var hunt = $scope.nav.topPage.data.randomhunt;

@@ -97,6 +97,10 @@ module.service('historyService', function($localStorage) {
         return $localStorage.historyMaxSize;
     }
 
+    this.count = function() {
+        return $localStorage.history.length;
+    }
+
     this.applyHistorySize = function(sz) {
         if (sz < $localStorage.history.length) {
             // trim down history
@@ -123,7 +127,7 @@ module.service('bookmarksService', function($localStorage) {
     }
 
     this.has = function(hunt) {
-      return hunt.id in $localStorage.bookmarks;
+      return hunt != null && hunt.id in $localStorage.bookmarks;
     }
 
     this.getAll = function() {
@@ -131,10 +135,14 @@ module.service('bookmarksService', function($localStorage) {
         return keys.map(function(v) { return $localStorage.bookmarks[v]; });
     }
 
+    this.count = function() {
+        return Object.keys($localStorage.bookmarks).length;
+    }
+
 });
 
 
-module.service('randomHuntService', function($http, $localStorage) {
+module.service('randomHuntService', function($http, $localStorage, bookmarksService) {
 
     var URL = "https://api.producthunt.com/v1/";
     var HEADER_OPTIONS = {
@@ -152,6 +160,7 @@ module.service('randomHuntService', function($http, $localStorage) {
         filter: {
             topics : [],
             collections : [],
+            bookmarkedOnly : false,
             createdAfter : new Date(2015, 01, 01)
         },
         trendingTopics: [],
@@ -238,6 +247,13 @@ module.service('randomHuntService', function($http, $localStorage) {
         return (new Date(hunt.created_at).getTime() >= createdAfter.getTime());
     }
 
+    var bookmarkFilterOk = function(hunt, bookmarkedOnly) {
+        if (!bookmarkedOnly) {
+            return;
+        }
+        return bookmarksService.has(hunt);
+    }
+
     var collectionFilterOk = function(hunt, collections) {
         if (collections.length == 0) {
             return true; // nothing to filter
@@ -247,14 +263,13 @@ module.service('randomHuntService', function($http, $localStorage) {
 
      // private
     var include = function(hunt, filter) {
-      if (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics) && collectionFilterOk(hunt, filter.collections)) {
-          return true;
-      }
-      return false;
+      return (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics) 
+          && collectionFilterOk(hunt, filter.collections) && bookmarkFilterOk(hunt, filter.bookmarkedOnly));
     }
 
     var applyFilterInner = function(filter) {
-        console.log("Applying filter {" + filter.topics + ", " + filter.collections + ", " + filter.createdAfter + "} on huntq");
+        console.log("Applying filter {" + filter.topics + ", " + filter.collections 
+          + ", " + filter.createdAfter + ", " + filter.bookmarkedOnly + "} on huntq");
         var huntQ = $localStorage.huntq;
         var updatedHuntQ = []
         for(var i in huntQ) {
@@ -267,7 +282,7 @@ module.service('randomHuntService', function($http, $localStorage) {
     }
 
     this.setFilter = function(type, filter) {
-        console.log("Setting filter of type " + type);
+        console.log("Setting filter of type " + type + ":" + filter);
         $localStorage.filter[type] = filter;
     }
 
@@ -302,6 +317,18 @@ module.service('randomHuntService', function($http, $localStorage) {
       var url = "";
       var reduceResponseSize = false;
       var fromCollections = false;
+
+      if ($localStorage.filter.bookmarkedOnly) {
+          $localStorage.huntq = bookmarksService.getAll();
+          console.log("New HuntQ size " + $localStorage.huntq.length);
+          applyFilterInner($localStorage.filter);
+          if ($done != null) {
+              $done();
+          }
+          return;
+      }
+
+
       if ($localStorage.filter.collections.length > 0) {
           url = URL + "collections/" + $localStorage.filter.collections[0].id;
           fromCollections = true;
@@ -364,7 +391,7 @@ module.service('randomHuntService', function($http, $localStorage) {
           }
       }
       else {
-          console.error("No hunts to show");
+          console.error("No hunts to show. Try changing the filters or connecting to the internet");
       }
       // build a healthy set of buffered hunts
       this.sync();

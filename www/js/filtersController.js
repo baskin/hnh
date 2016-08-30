@@ -1,4 +1,4 @@
-module.controller('filtersController', function($scope, randomHuntService) {
+module.controller('filtersController', function($scope, randomHuntService, bookmarksService) {
 
     randomHuntService.trendingTopics(function(topics) {
     	$scope.trendingTopics = topics;
@@ -14,8 +14,13 @@ module.controller('filtersController', function($scope, randomHuntService) {
     $scope.createdAfter = new Date(randomHuntService.getFilter("createdAfter"));
     $scope.maxFilterDate = new Date(Date.now());
 
-    $scope.applyFilter = function(createdAfter) {
+    $scope.bookmarksCount = bookmarksService.count();
+    $scope.bookmarkedOnly = randomHuntService.getFilter("bookmarkedOnly");
+
+    $scope.applyFilter = function(createdAfter, bookmarkedOnly) {
         randomHuntService.setFilter("createdAfter", createdAfter);
+        console.log("value of bookmarkedOnly:" + bookmarkedOnly);
+        randomHuntService.setFilter("bookmarkedOnly", bookmarkedOnly);
         randomHuntService.applyFilter();
     }
 
