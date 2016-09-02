@@ -1,6 +1,5 @@
 # Welcome to HnH based on OnsenUI 2.
 
-- add filters page
 - add tutorial page
 - hunq: keep ts with each hunt
    - expire old ones
@@ -15,9 +14,10 @@
   - share
   - see comments
   - iframe issue: allow page to open in new page
+  - use inappbrowser + ngcordova
 - history
   - remove from history button
-  - configure history size
+  - improve configure history size option
 - settings
   - welcome settings (name, email, hunts done)
   - clear cache
@@ -26,9 +26,10 @@
     - sources
     - topics
     - horizon
-- replace fa icons with md icons
 - js doesn't fire when app comes on foreground again
 - save prefs, history, bookmarks to drive
 - live events https://api.producthunt.com/v1/docs/live_events/
 - audio doesn't stop on navigating away. Ability to play in bkground?
-- reduce storage size
+- show currently applied filter (and option to remove it)
+- saved filters?
+- admob

@@ -3,6 +3,9 @@ module.controller('filtersController', function($scope, randomHuntService, bookm
     randomHuntService.trendingTopics(function(topics) {
     	$scope.trendingTopics = topics;
     });
+    randomHuntService.defaultTopics(function(topics) {
+        $scope.defaultTopics = topics;
+    });
     $scope.filteredTopics = randomHuntService.getFilter("topics");
 
 

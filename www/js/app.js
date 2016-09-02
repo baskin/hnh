@@ -155,22 +155,25 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
     var TRENDING_TOPICS_TTL_HOURS = 12;
     var FEATURED_COLLECTIONS_TTL_HOURS = 12;
 
+    var defaultTopicIds = [208,  183, 192];
+
     $localStorage.$default({
         huntq: [],
         filter: {
             topics : [],
             collections : [],
             bookmarkedOnly : false,
-            createdAfter : new Date(2015, 01, 01)
+            createdAfter : new Date(2012, 01, 01)
         },
+        defaultTopics: [],
         trendingTopics: [],
-        trendingTopicsUpdateTime: new Date(2015, 01, 01),
+        trendingTopicsUpdateTime: new Date(2012, 01, 01),
         featuredCollections: [],
-        featuredCollectionsUpdateTime: new Date(2015, 01, 01)
+        featuredCollectionsUpdateTime: new Date(2012, 01, 01)
     });
 
     this.featuredCollections = function($success, $failure) {
-        var hoursAgo = Math.round((Date.now() - $localStorage.featuredCollectionsUpdateTime)/(1000*60*60));
+        var hoursAgo = Math.round((Date.now() - new Date($localStorage.featuredCollectionsUpdateTime))/(1000*60*60));
         if (hoursAgo > FEATURED_COLLECTIONS_TTL_HOURS) {
             var url = URL + "collections?search[featured]=true&sort_by=featured_at";
             var future = $http.get(url, HEADER_OPTIONS);
@@ -179,7 +182,10 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
                     console.log("Received success from url " + url);
                     var collections = response.data['collections'];
                     console.log("Fetched " + collections.length + " featured collections");
-                    $localStorage.featuredCollections = collections;
+                    $localStorage.featuredCollections = [];
+                    for (var i in collections) {
+                        $localStorage.featuredCollections.push(toCollection(collections[i]));
+                    }
                     $localStorage.featuredCollectionsUpdateTime = new Date(Date.now());
                     if ($success != null) {
                         $success(collections);
@@ -194,12 +200,14 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
             );
         }
         else {
-            return $success($localStorage.featuredCollections);
+            if ($success != null) {
+                $success($localStorage.featuredCollections);
+            }
         }
     }
 
     this.trendingTopics = function($success, $failure) {
-        var hoursAgo = Math.round((Date.now() - $localStorage.trendingTopicsUpdateTime)/(1000*60*60));
+        var hoursAgo = Math.round((Date.now() - new Date($localStorage.trendingTopicsUpdateTime))/(1000*60*60));
         if (hoursAgo > TRENDING_TOPICS_TTL_HOURS) {
             var url = URL + "topics?search[trending]=true";
             var future = $http.get(url, HEADER_OPTIONS);
@@ -223,7 +231,51 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
             );
         }
         else {
-            return $success($localStorage.trendingTopics);
+            if ($success != null) {
+                $success($localStorage.trendingTopics);
+            }
+        }
+    }
+
+    var existsElementWithId = function(array, id) {
+        for (var i in array) {
+            if (array[i].id == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    this.defaultTopics = function($success, $failure) {
+        var needsUpdate = false;
+        for (var i in defaultTopicIds) {
+            var id = defaultTopicIds[i];
+            if (existsElementWithId($localStorage.defaultTopics, id)) {
+                continue;
+            }
+            needsUpdate = true;
+            var url = URL + "topics/" + id;
+            var future = $http.get(url, HEADER_OPTIONS);
+            future.then(
+                function(response) {
+                    var topic = response.data['topic'];
+                    $localStorage.defaultTopics.push(topic);
+                    if ($success != null) {
+                        $success($localStorage.defaultTopics);
+                    }
+                },
+                function(response) {
+                    console.error("Received error: " +  response.statustext);
+                    if ($failure != null) {
+                        $failure();
+                    }
+                }
+            );
+        }
+        if (!needsUpdate) {
+            if ($success != null) {
+                $success($localStorage.defaultTopics);
+            }
         }
     }
 
@@ -244,12 +296,12 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
     }
 
     var dateFilterOk = function(hunt, createdAfter) {
-        return (new Date(hunt.created_at).getTime() >= createdAfter.getTime());
+        return (new Date(hunt.created_at).getTime() >= new Date(createdAfter).getTime());
     }
 
     var bookmarkFilterOk = function(hunt, bookmarkedOnly) {
         if (!bookmarkedOnly) {
-            return;
+            return true;
         }
         return bookmarksService.has(hunt);
     }
@@ -262,18 +314,18 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
     }
 
      // private
-    var include = function(hunt, filter) {
-      return (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics) 
-          && collectionFilterOk(hunt, filter.collections) && bookmarkFilterOk(hunt, filter.bookmarkedOnly));
+    var include = function(hunt, filter, ignoreCollectionFilter) {
+      var included = (dateFilterOk(hunt, filter.createdAfter) && topicFilterOk(hunt, filter.topics) && bookmarkFilterOk(hunt, filter.bookmarkedOnly));
+      return ignoreCollectionFilter ? included : (included && collectionFilterOk(hunt, filter.collections));
     }
 
-    var applyFilterInner = function(filter) {
-        console.log("Applying filter {" + filter.topics + ", " + filter.collections 
-          + ", " + filter.createdAfter + ", " + filter.bookmarkedOnly + "} on huntq");
+    var applyFilterInner = function(filter, ignoreCollectionFilter) {
+        console.log("Applying filter {topics:" + filter.topics.length + ", collections:" + filter.collections.length 
+          + ", created_after:" + filter.createdAfter + ", bookmarked:" + filter.bookmarkedOnly + "} on huntq");
         var huntQ = $localStorage.huntq;
         var updatedHuntQ = []
         for(var i in huntQ) {
-            if (include(huntQ[i], filter)) {
+            if (include(huntQ[i], filter, ignoreCollectionFilter)) {
                 updatedHuntQ.push(huntQ[i]);
             }
         }
@@ -330,16 +382,18 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
 
 
       if ($localStorage.filter.collections.length > 0) {
+          // TODO support multiple collections
           url = URL + "collections/" + $localStorage.filter.collections[0].id;
           fromCollections = true;
       }
       else if ($localStorage.filter.topics.length > 0) {
+          // TODO support multiple topics
           url = URL + "posts/all?search[topic]=" + $localStorage.filter.topics[0].id;
           reduceResponseSize = true;
       }
       else {
           reduceResponseSize = true;
-          var daysBetween = Math.round((Date.now() - $localStorage.filter.createdAfter)/(1000*60*60*24));
+          var daysBetween = Math.round((Date.now() - new Date($localStorage.filter.createdAfter))/(1000*60*60*24));
           var daysAgo = Math.floor(Math.random() * daysBetween);
           url = URL + "posts?days_ago=" + daysAgo;
       }
@@ -360,7 +414,13 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
                 body = body.slice(0, 10);
                 console.log("Retained " + body.length + " random hunts");
             }
-            $localStorage.huntq = $localStorage.huntq.concat(body);
+            for (i in body) {
+                $localStorage.huntq.push(toHunt(body[i]));
+            }
+            if (fromCollections) {
+                // apply filter and ignore collections filter
+                applyFilterInner($localStorage.filter, true);
+            }
             console.log("New HuntQ size " + $localStorage.huntq.length);
             if ($done != null) {
                 $done();
@@ -374,6 +434,42 @@ module.service('randomHuntService', function($http, $localStorage, bookmarksServ
             }
         }
       );
+  }
+
+  var toHunt = function(detail) {
+      hunt = {};
+      hunt.id = detail.id;
+      hunt.name = detail.name;
+      hunt.tagline = detail.tagline;
+      hunt.topics = detail.topics;
+      hunt.votes_count = detail.votes_count;
+      hunt.created_at = detail.created_at;
+      hunt.thumbnail = detail.thumbnail;
+      hunt.redirect_url = detail.redirect_url;
+      hunt.comments_count = detail.comments_count;
+      var hasAudio = hunt.thumbnail.media_type == 'audio';
+      if (hasAudio) {
+          var audioUrl = hunt.thumbnail.metadata.url;
+          if (audioUrl.startsWith("http:")) {
+              audioUrl = audioUrl.replace("http", "https");
+          }
+      }
+      hunt.hasAudio = hasAudio;
+      hunt.audioUrl = audioUrl;
+      return hunt;
+  }
+
+  var toCollection = function(detail) {
+      collection = {};
+      collection.id = detail.id;
+      collection.name = detail.name;
+      collection.title = detail.title;
+      collection.subscriber_count = detail.subscriber_count;
+      collection.featured_at = detail.featured_at;
+      collection.created_at = detail.created_at;
+      collection.posts_count = detail.posts_count;
+      collection.background_image_url = detail.background_image_url;
+      return collection;
   }
 
   this.next = function() {

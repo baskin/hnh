@@ -4,17 +4,6 @@ module.controller('homeController', function($scope, $http, $location, randomHun
   $scope.updateModel = function(hunt, $done) {
       historyService.add(hunt);
       $scope.randomhunt = hunt;
-      var hasAudio = hunt.thumbnail.media_type == 'audio';
-      if (hasAudio) {
-          var audioUrl = hunt.thumbnail.metadata.url;
-          console.log("Audio meta detected " + audioUrl);
-          if (audioUrl.startsWith("http:")) {
-              audioUrl = audioUrl.replace("http", "https");
-              console.log("Will try to use https instead of http " + audioUrl);
-          }
-      }
-      $scope.randomhunt.hasAudio = hasAudio;
-      $scope.randomhunt.audioUrl = audioUrl;
       if (null != $done) {
           $done();
       }

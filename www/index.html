@@ -112,6 +112,8 @@
                 <ons-icon icon="fa-warning"></ons-icon>&nbsp;No products to show. Try to</ons-list-header>
                 <ons-list-item ng-click="nav.pushPage('filters.html')">Relax the current filters</ons-list-item>
                 <ons-list-item>Connect to the internet</ons-list-item>
+                <ons-list-header>
+                <ons-icon icon="fa-info"></ons-icon>&nbsp;In the meantime, why don't you</ons-list-header>
                 <ons-list-item ng-click="nav.pushPage('bookmarks.html')">Browse {{bookmarkCount}} bookmarked items</ons-list-item>
                 <ons-list-item ng-click="nav.pushPage('history.html')">Browse {{historyCount}} history items</ons-list-item>
             </ons-list>
@@ -418,7 +420,10 @@
         <ons-list modifier="inset" class="settings-list" tappable>
             <ons-list-item>
                 <label for="radio-topic" class="center">
-                    Topic&nbsp;<span class="settings-list-item-summary">({{filteredTopics[0].name}})</span>
+                    Topic&nbsp;
+                    <span class="settings-list-item-summary">
+                        {{filteredTopics[0].name}}&nbsp;{{filteredTopics[1].name}}&nbsp;{{filteredTopics[2].name}}&nbsp;{{filteredTopics[3].name}}
+                    </span>
                 </label>
                 <ons-button class="right" ng-click="filterTab.setActiveTab(1)">
                     <ons-icon icon="fa-edit"></ons-icon>
@@ -469,9 +474,32 @@
             </ons-list-item>
         </ons-list>
 
-          <ons-list-header>Trending topics (click to add)</ons-list-header>
           <ons-list class="history" modifier="inset">
+              <ons-list-header>Trending topics (click to add)</ons-list-header>
               <ons-list-item ripple class="history-li" modifier="tappable" ng-repeat="topic in trendingTopics" ng-click="push2ArrayUnique(filteredTopics, topic, 4)">
+                <ons-row>
+                  <ons-col width="50px">
+                      <img ng-src="{{topic.image}}" class="history-image">
+                  </ons-col>
+
+                  <ons-col>
+                    <div class="history-date">
+                        <div>
+                            {{topic.posts_count}}
+                        </div>
+                    </div>
+                    <div class="history-from">
+                      <span class="history-name">{{topic.name}}</span>
+                    </div>
+                    <div class="history-message">
+                      {{topic.description}}
+                    </div>
+                  </ons-col>
+                </ons-row>
+              </ons-list-item>
+
+              <ons-list-header>Default topics (click to add)</ons-list-header>
+              <ons-list-item ripple class="history-li" modifier="tappable" ng-repeat="topic in defaultTopics" ng-click="push2ArrayUnique(filteredTopics, topic, 4)">
                 <ons-row>
                   <ons-col width="50px">
                       <img ng-src="{{topic.image}}" class="history-image">
